@@ -1,0 +1,13 @@
+{
+    "folderPath": "../upload-t",
+    "mode": "ImageSide",
+    "maxFileSize": 80000,
+    "maxImageSide": 800,
+    "maxWidth": 400,
+    "maxHeight": 250,
+    "ableTypes": [
+        "jpeg",
+        "png",
+        "gif"
+    ]
+}
