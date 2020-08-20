@@ -30,6 +30,7 @@ class Reduction {
     private $ableTypes;  // типы принимаемых в работу файлов
 
     private $list = [];  // список обнаруженных файлов
+    private $cpath;      // путь к конфигурационному файлу  
     private $patterns = [
         "jpeg" => "~^(jpg|jpeg)$~i",
         "png" => "~^png$~i",

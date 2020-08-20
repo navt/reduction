@@ -68,7 +68,8 @@ class Logger implements LoggerInterface
     public function log($level, $message, array $context = []) {
         
         if (is_string($message) === false) {
-            throw new InvalidArgumentException("Аргумент message должен быть строкой");
+            $s = var_export($message, true);
+            throw new InvalidArgumentException("Аргумент message {$s} должен быть строкой");
         }
 
         $date = new DateTime();
