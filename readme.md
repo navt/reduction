@@ -17,27 +17,27 @@ Let's look at the file `data / config.json`, in it: <br>
 Thus, the code for a typical application might look like this: <br>
 
 ```php
-$ log = new Logger ("data / app.log");
-$ marker = new Marker ($ log);
+$log = new Logger("data/app.log");
+$marker = new Marker($log);
 
 // create a Reduction instance, get a list of files, print to the log
-$ reduct = new Reduction ($ log, "data / config.json");
-$ reduct-> getList (); // creates a list of filtered files
-$ reduct-> printList ();
-$ marker-> addMark (); // add timestamp
+$reduct = new Reduction($log, "data/config.json");
+$reduct->getList(); // creates a list of filtered files
+$reduct->printList();
+$marker->addMark(); // add timestamp
 
 // reduce the size of the files in the list, destroy the Reduction instance
-$ reduct-> reductAll (); // overwrite files
-$ reduct = null;
-$ marker-> addMark ();
+$reduct->reductAll(); // overwrite files
+$reduct = null;
+$marker->addMark();
 
 // check what happened
-$ reduct = new Reduction ($ log, "data / config.json");
-$ reduct-> getList ();
-$ reduct-> printList ();
-$ marker-> addMark ();
+$reduct = new Reduction($log, "data/config.json");
+$reduct->getList();
+$reduct->printList();
+$marker->addMark();
 
-$ marker-> display ();
+$marker->display();
 ```
 
 See also `app.php` file <br>
