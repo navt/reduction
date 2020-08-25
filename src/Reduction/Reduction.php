@@ -13,6 +13,7 @@ namespace Reduction;
 
 use Logger\Logger;
 use Reduction\AppException;
+use \stdClass;
 
 class Reduction {
     
@@ -90,7 +91,8 @@ class Reduction {
         $ri = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($this->folderPath), true);
         
         foreach ($ri as $file) {
-            $line = new \stdClass();  // элемент списка, будет содержать: path, type, size 
+            // элемент списка, будет содержать: type, path, size, width, height
+            $image = new stdClass();      
             
             if ($file == "." || $file == "..") {
                 continue;
@@ -101,84 +103,78 @@ class Reduction {
             foreach ($this->patterns as $type => $pattern) {
                 if (preg_match($pattern, $e)) {
                     if (in_array($type, $this->ableTypes)) {
-                        $line->type = $type;
-                        $line->path = $file->getPathname();
+                        $image->type = $type;
+                        $image->path = $file->getPathname();
+                        $image->size = $file->getSize();
+                        try {
+                            $is = getimagesize($image->path); // image size
+                            if ($is === false) {
+                                throw new AppException(__METHOD__." Невозможно получить сведения из {$image->path}");
+                            }
+                        } catch (AppException $e) {
+                            $this->log->error($e->getMessage());
+                            $image->type = null; // считаем, что это не изображение
+                            continue;
+                        }
+                        $image->width = $is[0];
+                        $image->height = $is[1];
                     }
                 }
             }
             // в зависимости от $mode решить включать ли изображение в список
             $target = false;
 
-            if (isset($line->type)) {
-                $target = $this->filter($file);
+            if (isset($image->type)) {
+                $target = $this->filter($image);
             }
 
             if ($target === true) {
-                $line->size = $file->getSize();
-                $this->list[] = $line;  // формируем массив из объектов
+                $this->list[] = $image;  // формируем массив из объектов
             }
 
-            unset($line);
+            unset($image);
         }
         return $this;
     }
 
-    private function filter($file) {
+    private function filter(stdClass $image) {
         
         if (in_array($this->mode, ["FileSize", "ImageSide"]) === false) {
             throw new AppException(__METHOD__." Не выбран режим фильтрации.");
         }
 
         if ($this->mode === "FileSize") {
-            return ($file->getSize() > $this->maxFileSize) ?  true : false;
+            return ($image->size > $this->maxFileSize) ?  true : false;
         }
         
         if ($this->mode === "ImageSide") {
-            return $this->testingOnSide($file->getPathname());
+            return $this->testingOnSide($image);
         }
         
     }
 
-    private function testingOnSide(string $path) {
-        try {
-            $is = getimagesize($path); // image size
-            if ($is === false) {
-                throw new AppException(__METHOD__." Невозможно получить сведения из {$path}");
-            }
-        } catch (AppException $e) {
-            $this->log->error($e->getMessage());
-            return false;
-        }
+    private function testingOnSide(stdClass $image) {
 
-        $aspectRatio = $is[0] / $is[1]; // ширинa / высоту
+        $aspectRatio = $image->width / $image->height; // ширинa / высоту
 
         switch ($aspectRatio) {
             case $aspectRatio > 1:
-                return ($is[0] > $this->maxImageSide) ? true : false;
+                return ($image->width > $this->maxImageSide) ? true : false;
                 break;
             case $aspectRatio < 1:
-                return ($is[1] > $this->maxImageSide) ? true : false;
+                return ($image->height > $this->maxImageSide) ? true : false;
                 break;
             case $aspectRatio = 1:
-                return ($is[0] > $this->maxImageSide) ? true : false;
+                return ($image->width > $this->maxImageSide) ? true : false;
                 break;
         }
 
     }
     
-    private function reduct(string $file="", string $type="") {
- 
-        try {
-            $is = getimagesize($file); // image size
-            if ($is === false) {
-                throw new AppException(__METHOD__." Невозможно получить сведения из {$file}");
-            }
-        } catch (AppException $e) {
-            $this->log->error($e->getMessage());
-            return false;
-        }
+    private function reduct(stdClass $image) {
+
         // по какой стороне уменьшать изображение?
-        $aspectRatio = $is[0] / $is[1];
+        $aspectRatio = $image->width / $image->height;
 
         switch ($aspectRatio) {
             case $aspectRatio > 1:
@@ -200,11 +196,11 @@ class Reduction {
             "gif" => ["imagecreatefromgif", "imagegif"]
         ];
         // уменьшение исходного изображения, перезапись файла
-        $func = $funcs[$type][0];
+        $func = $funcs[$image->type][0];
         try {
-            $src = $func($file);
+            $src = $func($image->path);
             if ($src === false) {
-                throw new AppException(__METHOD__." Невозможно создать ресурс из {$file}");
+                throw new AppException(__METHOD__." Невозможно создать ресурс из {$image->path}");
             }
         } catch (AppException $e) {
             $this->log->error($e->getMessage());
@@ -212,28 +208,34 @@ class Reduction {
         }
 
         $new = imagecreatetruecolor($width, $height);
-        imagecopyresampled ($new, $src, 0, 0, 0, 0, $width, $height, $is[0], $is[1]);
-        $func = $funcs[$type][1];
-        $effect = $func($new, $file);
+        imagecopyresampled ($new, $src, 0, 0, 0, 0, $width, $height, $image->width, $image->height);
+        $func = $funcs[$image->type][1];
+        $effect = $func($new, $image->path);
         imagedestroy($new);
         return $effect;
     }
     
     public function reductAll() {
         $i = 0;
+        $ts = 0; // total size
 
-        foreach ($this->list as $line) {
-            $effect = $this->reduct($line->path, $line->type);
+        foreach ($this->list as $image) {
+            $effect = $this->reduct($image);
             if ($effect === true) {
-                $fs = filesize($line->path);
-                $m = sprintf("%7d %s перезаписан, новый размер: %d", $i, $line->path, $fs);
+                $fs = filesize($image->path);
+                $m = sprintf("%7d %s перезаписан, новый размер: %d", $i, $image->path, $fs);
                 $this->log->info($m);
                 $i++;
+                $ts = $ts + $fs;
             } else {
-                $m = sprintf("Файл %s не был перезаписан.", $line->path);
+                $m = sprintf("Файл %s не был перезаписан.", $image->path);
                 $this->log->warning($m);
             }
         }
+
+        $m = sprintf("Перезаписано изображений: %d, общий объём новых файлов: %d B.\n",
+                $i, $ts);
+        $this->log->info($m);
 
     }
 
@@ -241,14 +243,20 @@ class Reduction {
         $ts = 0; // total size
         $this->log->info("Список выбранных изображений");
 
-        foreach ($this->list as $key => $line) {
-            $m = sprintf("%7d  %s  %s %d", $key, $line->path, $line->type, $line->size);
+        foreach ($this->list as $key => $image) {
+            $m = sprintf("%7d  %s  %s %d B  %dx%d px", 
+                $key, 
+                $image->type, 
+                $image->path, 
+                $image->size, 
+                $image->width, 
+                $image->height);
             $this->log->info($m);
-            $ts = $ts + $line->size;
+            $ts = $ts + $image->size;
         }
 
         $c = count($this->list);
-        $m = sprintf("Выбрано изображений: %d, общий объём выбранных файлов: %d байт.\n",
+        $m = sprintf("Выбрано изображений: %d, общий объём выбранных файлов: %d B.\n",
                 $c, $ts);
         $this->log->info($m);        
         return $this;

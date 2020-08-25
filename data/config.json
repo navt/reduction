@@ -9,5 +9,9 @@
         "jpeg",
         "png",
         "gif"
-    ]
+    ],
+    "quality": {
+        "jpeg": 75,
+        "png": 6
+    }
 }
