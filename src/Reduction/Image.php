@@ -17,18 +17,19 @@ class Image extends stdClass {
         if ($this->type !== "jpeg") {
             return 0;
         }
-
+        // соответствие orientation углу поворота изображения
         $mapping = [
+            1 => 0,
+            3 => 180,
             6 => -90,
-            8 => 90,
-            3 => 180
+            8 => 90
         ];
 
-        if (array_key_exists($this->orientaition, $mapping)) {
-            return $mapping[$this->orientaition];
+        if (array_key_exists($this->orientation, $mapping)) {
+            return $mapping[$this->orientation];
         } else {
             throw new AppException(
-                __METHOD__." Не определён угол поворота для Orientaition {$this->orientaition} {$this->path}"
+                __METHOD__." Не определён угол поворота для Orientation {$this->orientation} {$this->path}"
             );
         }
     }
@@ -39,7 +40,7 @@ class Image extends stdClass {
             return $this->width;
         }
 
-        switch ($this->orientaition) {
+        switch ($this->orientation) {
             case 1:
                 return $this->width;
                 break;
@@ -54,7 +55,7 @@ class Image extends stdClass {
                 break;
             default:
                 throw new AppException(
-                    __METHOD__." Не определён угол поворота для Orientaition {$this->orientaition} {$this->path}"
+                    __METHOD__." Не определён угол поворота для Orientation {$this->orientation} {$this->path}"
                 );
                 break;
         }
@@ -66,7 +67,7 @@ class Image extends stdClass {
             return $this->height;
         }
 
-        switch ($this->orientaition) {
+        switch ($this->orientation) {
             case 1:
                 return $this->height;
                 break;
@@ -81,7 +82,7 @@ class Image extends stdClass {
                 break;
             default:
                 throw new AppException(
-                    __METHOD__." Не определён угол поворота для Orientaition {$this->orientaition} {$this->path}"
+                    __METHOD__." Не определён угол поворота для Orientation {$this->orientation} {$this->path}"
                 );
                 break;
         }
@@ -90,5 +91,5 @@ class Image extends stdClass {
     public function getRealAspectRatio() {
         return $this->getRealWidth()/$this->getRealHeight();
     }
-    
+
 }

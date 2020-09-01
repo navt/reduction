@@ -92,11 +92,15 @@ class Reduction {
         $ri = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($this->folderPath), true);
         
         foreach ($ri as $file) {
-            // элемент списка, будет содержать: type, path, size, width, height
-            $image = new Image();      
             
-            if ($file->isDot()) continue;
+            if ($file->isFile() === false) continue; 
 
+            $exiftype = exif_imagetype($file->getPathname());
+
+            if ($exiftype === false) continue;
+
+            // элемент списка, будет содержать: type, path, size, width, height
+            $image = new Image(); 
             $e = $file->getExtension();
 
             foreach ($this->patterns as $type => $pattern) {
@@ -105,24 +109,29 @@ class Reduction {
                         $image->type = $type;
                         $image->path = $file->getPathname();
                         $image->size = $file->getSize();
-                        try {
-                            $output = [];
-                            $command = sprintf("./bin/imagesizes -path %s", $image->path);
-                            exec($command, $output);
-                            $sizes = json_decode($output[0], true);
 
-                            if ($sizes === null) {
-                                throw new AppException(__METHOD__." imagesizes: {$output[0]}");
-                            }
-
-                        } catch (AppException $e) {
-                            $this->log->error($e->getMessage());
-                            $image->type = null; // считаем, что это не изображение
-                            continue;
+                        switch ($exiftype) {
+                            case IMAGETYPE_JPEG:
+                                $exif = exif_read_data($image->path);
+                                if (!empty($exif["Orientation"])) {
+                                    $image->orientation = $exif["Orientation"];
+                                } else {
+                                    $image->orientation = 1;
+                                }
+                                break;
+                            case IMAGETYPE_PNG:
+                                $image->orientation = 1;
+                                break;
+                            case IMAGETYPE_GIF:
+                                $image->orientation = 1;
+                                break;
+                            default:
+                                break;
                         }
-                        $image->width = $sizes["width"];
-                        $image->height = $sizes["height"];
-                        $image->aspectRatio = $image->width/$image->height;
+
+                        $is = getimagesize($image->path);
+                        $image->width = $is[0];
+                        $image->height = $is[1];
                     }
                 }
             }
@@ -142,7 +151,7 @@ class Reduction {
         return $this;
     }
 
-    private function filter(stdClass $image) {
+    private function filter(Image $image) {
         
         if (in_array($this->mode, ["FileSize", "ImageSide"]) === false) {
             throw new AppException(__METHOD__." Не выбран режим фильтрации.");
@@ -153,50 +162,30 @@ class Reduction {
         }
         
         if ($this->mode === "ImageSide") {
-            return $this->testingOnSide($image);
+            return ($image->width>$this->maxImageSide || $image->height>$this->maxImageSide)
+                ? true : false;
         }
         
     }
 
-    private function testingOnSide(stdClass $image) {
+    private function reduct(Image $image) {
 
-        switch ($image->aspectRatio) {
-            case $image->aspectRatio > 1:
-                return ($image->width > $this->maxImageSide) ? true : false;
-                break;
-            case $image->aspectRatio < 1:
-                return ($image->height > $this->maxImageSide) ? true : false;
-                break;
-            case $image->aspectRatio = 1:
-                return ($image->width > $this->maxImageSide) ? true : false;
-                break;
-        }
-
-    }
-    
-    private function reduct(stdClass $image) {
-
-        switch ($image->aspectRatio) {
-            case $image->aspectRatio > 1:
+        switch ($image->getRealAspectRatio()) {
+            case $image->getRealAspectRatio() > 1:
                 $width = $this->maxWidth;
-                $height = (int)($this->maxWidth/$image->aspectRatio);
+                $height = (int)($this->maxWidth/$image->getRealAspectRatio());
                 break;
-            case $image->aspectRatio < 1:
+            case $image->getRealAspectRatio() < 1:
                 $height = $this->maxHeight;
-                $width = (int)($this->maxHeight * $image->aspectRatio);
+                $width = (int)($this->maxHeight * $image->getRealAspectRatio());
                 break;
-            case $aspectRatio = 1:
+            case $image->getRealAspectRatio() == 1:
                 $width = $this->maxHeight;
                 $height = $this->maxHeight;
                 break;
         }
-        $funcs = [
-            "jpeg" => "imagecreatefromjpeg",
-            "png" => "imagecreatefrompng",
-            "gif" => "imagecreatefromgif"
-        ];
         // уменьшение исходного изображения, перезапись файла
-        $func = $funcs[$image->type];
+        $func = "imagecreatefrom".$image->type;
         try {
             $src = $func($image->path);
             if ($src === false) {
@@ -207,21 +196,28 @@ class Reduction {
             return false;
         }
 
-        if ($image->aspectRatio < 1) {
-            $new = imagecreatetruecolor( $height, $width);
-            imagecopyresampled ($new, $src, 0, 0, 0, 0, $height, $width, $image->height, $image->width);
-            $new = imagerotate($new, 90);
-        } else {
-            $new = imagecreatetruecolor($width, $height);
-            imagecopyresampled ($new, $src, 0, 0, 0, 0, $width, $height, $image->width, $image->height);
+        if ($image->orientation !== 1) {
+            // имеется ли вариант обработки изображения с такой ориентацией
+            try {
+                $angle = $image->getAngle();
+            } catch (AppException $e) {
+                $this->log->warning($e->getMessage());
+                return false;
+            }
+            
+            $src = imagerotate($src, $angle, 0);
         }
+
+        $new = imagecreatetruecolor($width, $height);
+        imagecopyresampled ($new, $src, 0, 0, 0, 0, $width, $height, $image->getRealWidth(), $image->getRealHeight());
 
         $effect = $this->rewrite($new, $image);
         imagedestroy($new);
+        imagedestroy($src);
         return $effect;
     }
 
-    private function rewrite($new, stdClass $image) {
+    private function rewrite($new, Image $image) {
         
         if ($image->type == "gif") {
             $effect = imagegif($new, $image->path);
@@ -276,13 +272,14 @@ class Reduction {
         $this->log->info("Список выбранных изображений");
 
         foreach ($this->list as $key => $image) {
-            $m = sprintf("%7d  %s  %s %d B  %dx%d px", 
+            $m = sprintf("%7d  %s  %s %d B  %dx%d px (%d)", 
                 $key, 
                 $image->type, 
                 $image->path, 
                 $image->size, 
-                $image->width, 
-                $image->height);
+                $image->getRealWidth(), 
+                $image->getRealHeight(),
+                $image->orientation);
             $this->log->info($m);
             $ts = $ts + $image->size;
         }
