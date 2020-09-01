@@ -12,11 +12,20 @@ Let's look at the file `data/config.json`, in it: <br>
 `"maxImageSide"` - in the `"ImageSide"` mode, files with a long side larger than the value in pixels specified here will be selected <br>
 `"maxWidth"` - width of new images, if images are horizontal in pixels <br>
 `"maxHeight"` - height of new images, if images are vertical in pixels <br>
-`"ableTypes"` - array of file extensions, optionally there should be 3 values, select one or two for "dot" work <br> <br>
+`"ableTypes"` - array of file extensions, optionally there should be 3 values, select one or two for "dot" work <br>
+`"quality"` - the `quality` parameter when recording jpeg and png images using the imagejpeg(), imagepng() functions<br><br>
 
 Thus, the code for a typical application might look like this: <br>
 
 ```php
+chdir(__DIR__);
+require_once __DIR__.'/src/Loader/Loader.php';
+\Loader\Loader::autoload(true, __DIR__."/src");
+
+use Logger\Logger;
+use Reduction\Marker;
+use Reduction\Reduction;
+
 $log = new Logger("data/app.log");
 $marker = new Marker($log);
 
@@ -43,7 +52,11 @@ $marker->display();
 See also `app.php` file <br>
 
 ## Usage
-Place the contents of this repository on the server in the `reduction` directory, edit` data/config.json` and `app.php` in accordance with your current task. <br>
+Place the contents of this repository on the server in the `reduction` directory, like so
+```bash
+$ git clone https://github.com/navt/reduction.git
+```
+Edit` data/config.json` and `app.php` in accordance with your current task. <br>
 In the console go to the `reduction` directory. Run the script <br>
 `$ php -f app.php` <br>
 Using the console is preferable because with a large enough volume of images, the application will take time to complete the task. <br>
