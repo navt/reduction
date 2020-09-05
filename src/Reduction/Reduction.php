@@ -290,4 +290,8 @@ class Reduction {
         $this->log->info($m);        
         return $this;
     }
+
+    public function getVar(string $name) {
+        # code...
+    }
 }
