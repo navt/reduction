@@ -290,4 +290,8 @@ class Reduction {
         $this->log->info($m);        
         return $this;
     }
+
+    public function getVar(string $name="") {
+        return isset($this->$name) ? $this->$name : null;
+    }
 }

@@ -1,0 +1,17 @@
+{
+    "folderPath": "test-images",
+    "mode": "ImageSide",
+    "maxFileSize": 800,
+    "maxImageSide": 96,
+    "maxWidth": 80,
+    "maxHeight": 50,
+    "ableTypes": [
+        "jpeg",
+        "png",
+        "gif"
+    ],
+    "quality": {
+        "jpeg": 75,
+        "png": 6
+    }
+}
