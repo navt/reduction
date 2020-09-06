@@ -44,6 +44,23 @@ class ReductionTest extends TestCase {
         $this->assertEquals($reduct->getVar("quality"), 
             ["jpeg" => 75,
             "png" => 6]);
+    }
 
+    public function testGetList() {
+        $log = new Logger("../data/app.log", false);
+        $reduct = new Reduction($log, "test-data/conf-c.json");
+        $reduct->getList();
+        $list = $reduct->getVar("list");
+
+        $this->assertEquals(count($list), 1);
+        
+        $image = $list[0];
+
+        $this->assertEquals($image->type, "jpeg");
+        $this->assertEquals($image->width, 150);
+        $this->assertEquals($image->height, 200);
+        $this->assertEquals($image->size, 25939);
+        $this->assertEquals($image->orientation, 1);
+        $this->assertEquals($image->path, "test-images/pic123.JPG");
     }
 }
