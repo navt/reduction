@@ -1,6 +1,6 @@
 /draft/*
-/data/b-config.json
 /data/app.log
+/data/b-config.json
 /s.php
 /tests/phpunit.phar
 /tests/.phpunit.result.cache
