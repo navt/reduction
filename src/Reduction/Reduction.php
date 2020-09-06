@@ -291,7 +291,7 @@ class Reduction {
         return $this;
     }
 
-    public function getVar(string $name) {
-        # code...
+    public function getVar(string $name="") {
+        return isset($this->$name) ? $this->$name : null;
     }
 }

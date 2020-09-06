@@ -15,9 +15,13 @@ use DateTime;
 
 class Logger implements LoggerInterface
 {
+    private $active;
     private $logPath;
     
-    public function __construct(string $logPath="data/app.log") {
+    public function __construct(string $logPath="data/app.log", bool $active=true) {
+        $this->active = $active;
+
+        if ($this->active === false) return;
         
         $path = getcwd().DIRECTORY_SEPARATOR.$logPath;
         $this->logPath = $path;
@@ -67,6 +71,8 @@ class Logger implements LoggerInterface
 
     public function log($level, $message, array $context = []) {
         
+        if ($this->active === false) return;
+
         if (is_string($message) === false) {
             $s = var_export($message, true);
             throw new InvalidArgumentException("Аргумент message {$s} должен быть строкой");
