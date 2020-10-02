@@ -62,3 +62,6 @@ $ git clone https://github.com/navt/reduction.git
 
 ### Ограничения
 Скрипт не работает с gif-изображениями, имеющими несколько слоёв.
+
+### Ссылка
+[Оптимизация размера изображений на сайте](https://instantcms.ru/blogs/pobochnyi-yefekt/optimizacija-razmera-izobrazhenii-na-saite.html)

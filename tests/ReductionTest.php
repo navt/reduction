@@ -5,7 +5,7 @@ require_once dirname(__DIR__).'/src/Loader/Loader.php';
 
 use PHPUnit\Framework\TestCase;
 use Logger\Logger;
-use Reduction\Marker;
+// use Reduction\Marker;
 use Reduction\Reduction;
 use Reduction\Image;
 
