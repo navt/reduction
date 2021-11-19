@@ -19,14 +19,12 @@ class Logger implements LoggerInterface
     private $logPath;
     
     public function __construct(string $logPath="data/app.log", bool $active=true) {
-        $this->active = $active;
-
-        if ($this->active === false) return;
         
+        $this->active = $active;
         $path = getcwd().DIRECTORY_SEPARATOR.$logPath;
         $this->logPath = $path;
 
-        if (file_exists($path) && is_writable($path)) return;
+        if (file_exists($path)) return;
 
         $dir = dirname($path);
 
@@ -79,7 +77,8 @@ class Logger implements LoggerInterface
         }
 
         $date = new DateTime();
-        $out = sprintf("[%s] [%s] %s %s\n",
+        $outFormat = "[%s] [%s] %s".PHP_EOL."%s";
+        $out = sprintf($outFormat,
             $date->format('Y-m-d H:i:s.v'), 
             ucfirst($level),
             $message,
@@ -88,7 +87,7 @@ class Logger implements LoggerInterface
     }
 
     private function displayContext(array $context=[]) {
-        return ($context == []) ? "" : json_encode($context, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+        return ($context == []) ? "" : json_encode($context, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT).PHP_EOL;
     }
 
 }
