@@ -57,7 +57,7 @@ class Reduction {
             $this->$name = $value;
         }
 
-        $this->log->info("Заданы значения:\n", $a);
+        $this->log->info("Заданы значения:", $a);
     }
 
     private function readConfig() {
@@ -261,7 +261,7 @@ class Reduction {
             }
         }
 
-        $m = sprintf("Перезаписано изображений: %d, общий объём новых файлов: %d B.\n",
+        $m = sprintf("Перезаписано изображений: %d, общий объём новых файлов: %d B.",
                 $i, $ts);
         $this->log->info($m);
 
@@ -285,7 +285,7 @@ class Reduction {
         }
 
         $c = count($this->list);
-        $m = sprintf("Выбрано изображений: %d, общий объём выбранных файлов: %d B.\n",
+        $m = sprintf("Выбрано изображений: %d, общий объём выбранных файлов: %d B.",
                 $c, $ts);
         $this->log->info($m);        
         return $this;
