@@ -11,7 +11,10 @@ use Reduction\AppException;
 use \stdClass;
 
 class Image extends stdClass {
-    
+    /*
+     *  объект Image, будет содержать свойства: 
+     *  type, path, size, width, height, orientation
+     */
     public function getAngle() {
         
         if ($this->type !== "jpeg") {

@@ -22,9 +22,9 @@ class Reduction {
     private $cpaph;      // путь к файлу конфигурации
     private $folderPath; // путь к директории изображений
                          // 2 варианта фильтрации изображений:
+    private $mode;       // "FileSize" / "ImageSide"
     private $maxFileSize;  // по размеру файла, с которого начнется фильтрация или
     private $maxImageSide; // по размеру длинной стороны изображения, с которого начнется фильтрация
-    private $mode;       // "FileSize" / "ImageSide"
 
     private $maxWidth;   // ширина новых изображений, если изображения горизонтальные
     private $maxHeight;  // высота новых изображений, если изображения вертикальные
@@ -99,7 +99,8 @@ class Reduction {
 
             if ($exiftype === false) continue;
 
-            // элемент списка, будет содержать: type, path, size, width, height
+            // элемент списка - объект класса Image, будет содержать свойства: 
+            // type, path, size, width, height, orientation
             $image = new Image(); 
             $e = $file->getExtension();
 
@@ -209,6 +210,13 @@ class Reduction {
         }
 
         $new = imagecreatetruecolor($width, $height);
+        
+        // png изображения имеют прозрачность, поэтому
+        if ($image->type === "png") {
+            imagealphablending($new, false); // накладываемый пиксель заменяет исходный
+            imagesavealpha($new, true);      // сохранять информацию о прозрачности
+        }
+
         imagecopyresampled ($new, $src, 0, 0, 0, 0, $width, $height, $image->getRealWidth(), $image->getRealHeight());
 
         $effect = $this->rewrite($new, $image);
