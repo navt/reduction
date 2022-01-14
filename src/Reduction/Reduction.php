@@ -15,6 +15,7 @@ use Logger\Logger;
 use Reduction\AppException;
 use Reduction\Image;
 
+
 class Reduction {
     
     private $log;        // логгер
@@ -37,6 +38,12 @@ class Reduction {
         "jpeg" => "~^(jpg|jpeg)$~i",
         "png" => "~^png$~i",
         "gif" => "~^gif$~i"
+    ];
+
+    private $classes = [
+        IMAGETYPE_GIF => "Gif",
+        IMAGETYPE_JPEG => "Jpeg",
+        IMAGETYPE_PNG => "Png"
     ];
 
     public function __construct(Logger $log, string $cpath="data/config.json") {
@@ -99,29 +106,40 @@ class Reduction {
 
             if ($exiftype === false) continue;
 
-            // элемент списка - объект класса Image, будет содержать свойства: 
-            // type, path, size, width, height, orientation
-            $image = new Image(); 
+            // элемент списка - объект, реализующий интерфейс Image, будет 
+            // содержать свойства: type, path, size, width, height, orientation, quality
+
+            if (key_exists($exiftype, $this->classes)) {
+                $class = sprintf("Reduction\%s", $this->classes[$exiftype]);
+                $image = new $class($this->log);
+            } else {
+                continue;
+            }
+             
             $e = $file->getExtension();
 
             foreach ($this->patterns as $type => $pattern) {
                 if (preg_match($pattern, $e)) {
                     if (in_array($type, $this->ableTypes)) {
-                        $image->type = $type;
-                        $image->path = $file->getPathname();
-                        $image->size = $file->getSize();
+                        $image->type = $type;               // type
+                        $image->path = $file->getPathname();// path
+                        $image->size = $file->getSize();    // size
 
-                        switch ($exiftype) {
+                        switch ($exiftype) {                // orientation  
                             case IMAGETYPE_JPEG:
                                 $exif = exif_read_data($image->path);
+                                
                                 if (!empty($exif["Orientation"])) {
                                     $image->orientation = $exif["Orientation"];
                                 } else {
                                     $image->orientation = 1;
                                 }
+
+                                $image->quality = $this->quality["jpeg"];
                                 break;
                             case IMAGETYPE_PNG:
                                 $image->orientation = 1;
+                                $image->quality = $this->quality["png"];
                                 break;
                             case IMAGETYPE_GIF:
                                 $image->orientation = 1;
@@ -131,8 +149,8 @@ class Reduction {
                         }
 
                         $is = getimagesize($image->path);
-                        $image->width = $is[0];
-                        $image->height = $is[1];
+                        $image->width = $is[0];           // width
+                        $image->height = $is[1];          // height
                     }
                 }
             }
@@ -144,7 +162,7 @@ class Reduction {
             }
 
             if ($target === true) {
-                $this->list[] = $image;  // формируем массив из объектов
+                $this->list[] = $image;  // пишем объект в массив
             }
 
             unset($image);
@@ -163,7 +181,7 @@ class Reduction {
         }
         
         if ($this->mode === "ImageSide") {
-            return ($image->width>$this->maxImageSide || $image->height>$this->maxImageSide)
+            return ($image->width > $this->maxImageSide || $image->height > $this->maxImageSide)
                 ? true : false;
         }
         
@@ -185,57 +203,10 @@ class Reduction {
                 $height = $this->maxHeight;
                 break;
         }
+        
         // уменьшение исходного изображения, перезапись файла
-        $func = "imagecreatefrom".$image->type;
-        try {
-            $src = $func($image->path);
-            if ($src === false) {
-                throw new AppException(__METHOD__." Невозможно создать ресурс из {$image->path}");
-            }
-        } catch (AppException $e) {
-            $this->log->error($e->getMessage());
-            return false;
-        }
+        $effect = $image->buildNewImage($width, $height);
 
-        if ($image->orientation !== 1) {
-            // имеется ли вариант обработки изображения с такой ориентацией
-            try {
-                $angle = $image->getAngle();
-            } catch (AppException $e) {
-                $this->log->warning($e->getMessage());
-                return false;
-            }
-            
-            $src = imagerotate($src, $angle, 0);
-        }
-
-        $new = imagecreatetruecolor($width, $height);
-        
-        // png изображения имеют прозрачность, поэтому
-        if ($image->type === "png") {
-            imagealphablending($new, false); // накладываемый пиксель заменяет исходный
-            imagesavealpha($new, true);      // сохранять информацию о прозрачности
-        }
-
-        imagecopyresampled ($new, $src, 0, 0, 0, 0, $width, $height, $image->getRealWidth(), $image->getRealHeight());
-
-        $effect = $this->rewrite($new, $image);
-        imagedestroy($new);
-        imagedestroy($src);
-        return $effect;
-    }
-
-    private function rewrite($new, Image $image) {
-        
-        if ($image->type == "gif") {
-            $effect = imagegif($new, $image->path);
-        }
-        if ($image->type == "jpeg") {
-            $effect = imagejpeg($new, $image->path, $this->quality["jpeg"]);
-        }
-        if ($image->type == "png") {
-            $effect = imagepng($new, $image->path, $this->quality["png"]);
-        }
         return $effect;
     }
     
