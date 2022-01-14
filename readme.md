@@ -1,6 +1,6 @@
 # Reduction
 
-Reduction is designed to optimize the size of images on a website. Often, users upload too large images to the server :) <br>
+Utility Reduction is designed to optimize the size of images on a website. Often, users upload too large images to the server :) <br>
 The logic of the application is as follows: first, directories are inspected for the presence of image files (jpeg, png, gif) larger than a certain size, then the found files can be overwritten with the optimal width and height (the proportions remain correct). Files are searched recursively. <br>
 You can select images not only by the file size, but also by the size of the "long" side of the image. The settings are placed in the file `data/config.json`. <br>
 To navigate how much the application is running in time and consumes memory, the Marker class is written. The results are written to the log. <br> <br>
@@ -59,8 +59,8 @@ $ git clone https://github.com/navt/reduction.git
 Edit` data/config.json` and `app.php` in accordance with your current task.<br>
 In the console go to the `reduction` directory. Run the script<br>
 `$ php -f app.php` <br>
-Using the console is preferable because with a large enough volume of images, the application will take time to complete the task.<br>
+Using the console is preferable because with a large enough volume of images, the application will take time to complete the task. Conduct an evaluation run with a small number of files to understand how fast the utility works.<br>
 Take care of the security of your data: make a dump of the directories where you plan to carry out work, run the script on the test data on the local computer, see if the result is satisfactory to you.
 
-### Restrictions
-The script does not work with gifs with multiple layers.
+### Peculiars
+To work correctly on your server, you must have the PHP `imagick` module installed to work with gif-images that have several layers. As well as the PHP `gd` module for working with jpeg and png images. If you have gif images on your site that have multiple layers and you're going to downsize them, consider running the gif-only utility separately.
