@@ -5,14 +5,17 @@ require_once dirname(__DIR__).'/src/Loader/Loader.php';
 
 use PHPUnit\Framework\TestCase;
 use Logger\Logger;
-// use Reduction\Marker;
 use Reduction\Reduction;
+
 use Reduction\Image;
+use Reduction\Jpeg;
+use Reduction\Png;
 
 class ReductionTest extends TestCase {
     
-    public function testImage() {
-        $image = new Image();
+    public function testJpeg() {
+        $log = new Logger("../data/app.log", false);
+        $image = new Jpeg($log);
         
         $image->width = 50;
         $image->height = 25;
@@ -23,8 +26,20 @@ class ReductionTest extends TestCase {
         $this->assertEquals($image->getRealHeight(), 50);
         $this->assertEquals($image->getRealAspectRatio(), 0.5);
         $this->assertEquals($image->getAngle(), 90);
+        
+    }
+
+    public function testPng() {
+        $log = new Logger("../data/app.log", false);
+        $image = new Png($log);
+        
+        $image->width = 50;
+        $image->height = 25;
+        $image->orientation = 1;
 
         $image->type = "png";
+        $this->assertEquals($image->getRealWidth(), 50);
+        $this->assertEquals($image->getRealHeight(), 25);
         $this->assertEquals($image->getRealAspectRatio(), 2);
         $this->assertEquals($image->getAngle(), 0);
         
