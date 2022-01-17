@@ -98,6 +98,8 @@ class Gif implements Image {
         $effect = imagegif($new, $this->path);
         imagedestroy($new);
         imagedestroy($image);
+        $this->src = "";
+
         return $effect;
     }
 

@@ -57,7 +57,7 @@ class Reduction {
             }
         } catch (AppException $e) {
             $this->log->error($e->getMessage());
-            exit(2);
+            exit();
         }
 
         foreach ($a as $name => $value) {
@@ -80,7 +80,7 @@ class Reduction {
             }
         } catch (AppException $e) {
             $this->log->error($e->getMessage());
-            exit(1);
+            exit();
         }
         return $s;
     }
@@ -93,7 +93,7 @@ class Reduction {
             }
         } catch (AppException $e) {
             $this->log->error($e->getMessage());
-            exit(2);
+            exit();
         }
         
         $ri = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($this->folderPath), true);
@@ -189,17 +189,18 @@ class Reduction {
 
     private function reduct(Image $image) {
         try {
-            
-            switch ($image->getRealAspectRatio()) {
-                case $image->getRealAspectRatio() > 1:
+            $rar = $image->getRealAspectRatio();
+
+            switch ($rar) {
+                case $rar > 1:
                     $width = $this->maxWidth;
-                    $height = (int)($this->maxWidth/$image->getRealAspectRatio());
+                    $height = (int)($this->maxWidth/$rar);
                     break;
-                case $image->getRealAspectRatio() < 1:
+                case $rar < 1:
                     $height = $this->maxHeight;
-                    $width = (int)($this->maxHeight * $image->getRealAspectRatio());
+                    $width = (int)($this->maxHeight * $rar);
                     break;
-                case $image->getRealAspectRatio() == 1:
+                case $rar == 1:
                     $width = $this->maxHeight;
                     $height = $this->maxHeight;
                     break;
