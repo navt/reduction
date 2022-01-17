@@ -59,10 +59,8 @@ class Gif implements Image {
         $isAni = ($count === 2) ? true : false;
         // используем gd или imagick в зависимости от ситуации
         if ($isAni === true) {
-            echo "imagick ".$this->path.PHP_EOL;
             return $this->useImagick($width, $height);
         } else {
-            echo "gd ".$this->path.PHP_EOL;
             return $this->useGD($width, $height);
         }
     
