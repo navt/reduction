@@ -63,4 +63,6 @@ Using the console is preferable because with a large enough volume of images, th
 Take care of the security of your data: make a dump of the directories where you plan to carry out work, run the script on the test data on the local computer, see if the result is satisfactory to you.
 
 ### Peculiars
-To work correctly on your server, you must have the PHP `imagick` module installed to work with gif-images that have several layers. As well as the PHP `gd` module for working with jpeg and png images. If you have gif images on your site that have multiple layers and you're going to downsize them, consider running the gif-only utility separately.
+To work with jpeg, png and gif images without animation, the PHP module `gd` will be used.<br>
+To work with gif-images that have several layers (animation), the PHP module `imagick` must be installed on your server. If there is no such module, then animated gifs will not be overwritten.<br>
+If you're going to scale down gifs that have multiple layers, consider running the gif-only utility separately.

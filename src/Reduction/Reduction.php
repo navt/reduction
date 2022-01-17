@@ -205,9 +205,9 @@ class Reduction {
                     $height = $this->maxHeight;
                     break;
             }
-        
             // уменьшение исходного изображения, перезапись файла
             $effect = $image->buildNewImage($width, $height);
+            
         // все исключения из классов Jpeg, Png, Gif перехватываются здесь:
         } catch (AppException $e) {
             $this->log->warning($e->getMessage());
