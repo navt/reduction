@@ -54,7 +54,7 @@ class Jpeg implements Image {
                 break;
             default:
                 throw new AppException(
-                    __METHOD__." Не определён угол поворота для Orientation {$this->orientation} {$this->path}"
+                    __METHOD__." Не определён вариант поворота для Orientation {$this->orientation} {$this->path}"
                 );
                 break;
         }
@@ -77,7 +77,7 @@ class Jpeg implements Image {
                 break;
             default:
                 throw new AppException(
-                    __METHOD__." Не определён угол поворота для Orientation {$this->orientation} {$this->path}"
+                    __METHOD__." Не определён вариант поворота для Orientation {$this->orientation} {$this->path}"
                 );
                 break;
         }
@@ -90,25 +90,15 @@ class Jpeg implements Image {
     public function buildNewImage($width, $height) {
         // уменьшение исходного изображения, перезапись файла
 
-        try {
             $src = imagecreatefromjpeg($this->path);
             if ($src === false) {
                 throw new AppException(__METHOD__." Невозможно создать ресурс из {$this->path}");
             }
-        } catch (AppException $e) {
-            $this->log->error($e->getMessage());
-            return false;
-        }
 
         if ($this->orientation !== 1) {
             // имеется ли вариант обработки изображения с такой ориентацией
-            try {
-                $angle = $this->getAngle();
-            } catch (AppException $e) {
-                $this->log->warning($e->getMessage());
-                return false;
-            }
-            
+            // если угол не найдется getAngle() выбросит исключение
+            $angle = $this->getAngle();
             $src = imagerotate($src, $angle, 0);
         }
 

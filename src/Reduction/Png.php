@@ -36,14 +36,9 @@ class Png implements Image {
     public function buildNewImage($width, $height) {
         // уменьшение исходного изображения, перезапись файла
 
-        try {
-            $src = imagecreatefrompng($this->path);
-            if ($src === false) {
-                throw new AppException(__METHOD__." Невозможно создать ресурс из {$this->path}");
-            }
-        } catch (AppException $e) {
-            $this->log->error($e->getMessage());
-            return false;
+        $src = imagecreatefrompng($this->path);
+        if ($src === false) {
+            throw new AppException(__METHOD__." Невозможно создать ресурс из {$this->path}");
         }
 
         $new = imagecreatetruecolor($width, $height);

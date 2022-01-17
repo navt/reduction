@@ -188,25 +188,31 @@ class Reduction {
     }
 
     private function reduct(Image $image) {
-
-        switch ($image->getRealAspectRatio()) {
-            case $image->getRealAspectRatio() > 1:
-                $width = $this->maxWidth;
-                $height = (int)($this->maxWidth/$image->getRealAspectRatio());
-                break;
-            case $image->getRealAspectRatio() < 1:
-                $height = $this->maxHeight;
-                $width = (int)($this->maxHeight * $image->getRealAspectRatio());
-                break;
-            case $image->getRealAspectRatio() == 1:
-                $width = $this->maxHeight;
-                $height = $this->maxHeight;
-                break;
+        try {
+            
+            switch ($image->getRealAspectRatio()) {
+                case $image->getRealAspectRatio() > 1:
+                    $width = $this->maxWidth;
+                    $height = (int)($this->maxWidth/$image->getRealAspectRatio());
+                    break;
+                case $image->getRealAspectRatio() < 1:
+                    $height = $this->maxHeight;
+                    $width = (int)($this->maxHeight * $image->getRealAspectRatio());
+                    break;
+                case $image->getRealAspectRatio() == 1:
+                    $width = $this->maxHeight;
+                    $height = $this->maxHeight;
+                    break;
+            }
+        
+            // уменьшение исходного изображения, перезапись файла
+            $effect = $image->buildNewImage($width, $height);
+        // все исключения из классов Jpeg, Png, Gif перехватываются здесь:
+        } catch (AppException $e) {
+            $this->log->warning($e->getMessage());
+            return false;
         }
         
-        // уменьшение исходного изображения, перезапись файла
-        $effect = $image->buildNewImage($width, $height);
-
         return $effect;
     }
     
