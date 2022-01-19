@@ -89,11 +89,11 @@ class Jpeg implements Image {
 
     public function buildNewImage($width, $height) {
         // уменьшение исходного изображения, перезапись файла
-
-            $src = imagecreatefromjpeg($this->path);
-            if ($src === false) {
-                throw new AppException(__METHOD__." Невозможно создать ресурс из {$this->path}");
-            }
+        $src = imagecreatefromjpeg($this->path);
+        
+        if ($src === false) {
+            throw new AppException(__METHOD__." Невозможно создать ресурс из {$this->path}");
+        }
 
         if ($this->orientation !== 1) {
             // имеется ли вариант обработки изображения с такой ориентацией
