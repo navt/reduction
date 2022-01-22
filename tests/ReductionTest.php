@@ -65,6 +65,10 @@ class ReductionTest extends TestCase {
     }
 
     public function generate($qPic = 5, $width = 500, $dir = "test-images") {
+        
+        if (is_dir($dir) === false) {
+            mkdir($dir);
+        }
 
         $height = (int)$width/2;
 
