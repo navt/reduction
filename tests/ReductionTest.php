@@ -12,38 +12,7 @@ use Reduction\Jpeg;
 use Reduction\Png;
 
 class ReductionTest extends TestCase {
-    
-    public function testJpeg() {
-        $log = new Logger("../data/app.log", false);
-        $image = new Jpeg($log);
-        
-        $image->width = 50;
-        $image->height = 25;
-        $image->orientation = 8;
-
-        $image->type = "jpeg";
-        $this->assertEquals($image->getRealWidth(), 25);
-        $this->assertEquals($image->getRealHeight(), 50);
-        $this->assertEquals($image->getRealAspectRatio(), 0.5);
-        $this->assertEquals($image->getAngle(), 90);
-        
-    }
-
-    public function testPng() {
-        $log = new Logger("../data/app.log", false);
-        $image = new Png($log);
-        
-        $image->width = 50;
-        $image->height = 25;
-        $image->orientation = 1;
-
-        $image->type = "png";
-        $this->assertEquals($image->getRealWidth(), 50);
-        $this->assertEquals($image->getRealHeight(), 25);
-        $this->assertEquals($image->getRealAspectRatio(), 2);
-        $this->assertEquals($image->getAngle(), 0);
-        
-    }
+    public $paths = [];
 
     public function testConstruct() {
         $log = new Logger("../data/app.log", false);
@@ -51,7 +20,7 @@ class ReductionTest extends TestCase {
 
         $this->assertEquals($reduct->getVar("cpath"), "test-data/conf-c.json");
         $this->assertEquals($reduct->getVar("mode"), "ImageSide");
-        $this->assertEquals($reduct->getVar("maxImageSide"), 96);
+        $this->assertEquals($reduct->getVar("maxImageSide"), 480);
         $this->assertEquals($reduct->getVar("ableTypes"), 
             ["jpeg",
             "png",
@@ -61,21 +30,62 @@ class ReductionTest extends TestCase {
             "png" => 6]);
     }
 
-    public function testGetList() {
+
+    public function testFullCicle() {
+        // создаем 5 тестовых изображений размером 500х250
+        $this->generate(5, 500, "test-images");
+
         $log = new Logger("../data/app.log", false);
         $reduct = new Reduction($log, "test-data/conf-c.json");
+        // получаем список в соответствии с conf-c.json
         $reduct->getList();
-        $list = $reduct->getVar("list");
-
-        $this->assertEquals(count($list), 1);
         
-        $image = $list[0];
-
+        // частично смотрим, правильно ли выбралось
+        $list = $reduct->getVar("list");
+        
+        $this->assertEquals(count($list), 5);
+        
+        $image = $list[2];
         $this->assertEquals($image->type, "jpeg");
-        $this->assertEquals($image->width, 150);
-        $this->assertEquals($image->height, 200);
-        $this->assertEquals($image->size, 25939);
+        $this->assertEquals($image->width, 500);
+        $this->assertEquals($image->height, 250);
+        $this->assertEquals($image->size, 2738);
         $this->assertEquals($image->orientation, 1);
-        $this->assertEquals($image->path, "test-images/pic123.JPG");
+        $list = null;
+        
+        // уменьшаем по стороне до 220 px 
+        $reduct->reductAll();
+        // смотрим на размеры одного из изображений
+        $size = getimagesize($this->paths[1]);
+        $this->assertEquals($size[0], 220);
+        $this->assertEquals($size[1], 110);
+        // удаляем тестовые изображения
+        $this->delete();
+        
     }
+
+    public function generate($qPic = 5, $width = 500, $dir = "test-images") {
+
+        $height = (int)$width/2;
+
+        for ($i = 0; $i < $qPic; $i++) { 
+            $im = imagecreatetruecolor($width, $height);
+            $color = imagecolorallocate($im, 5, 0, 254);
+            imagefill($im, 0, 0, $color);
+            $path = sprintf("%s/%s.jpeg", $dir, $i);
+
+            if (imagejpeg($im, $path, 75) === true) {
+                $this->paths[] = $path;
+            }
+
+        }
+
+    }
+
+    public function delete() {
+        foreach ($this->paths as $path) {
+            unlink($path);
+        }
+    }
+
 }

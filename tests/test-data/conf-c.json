@@ -2,9 +2,9 @@
     "folderPath": "test-images",
     "mode": "ImageSide",
     "maxFileSize": 800,
-    "maxImageSide": 96,
-    "maxWidth": 80,
-    "maxHeight": 50,
+    "maxImageSide": 480,
+    "maxWidth": 220,
+    "maxHeight": 110,
     "ableTypes": [
         "jpeg",
         "png",
