@@ -12,56 +12,61 @@ use Reduction\Jpeg;
 use Reduction\Png;
 
 class ReductionTest extends TestCase {
+    
     public $paths = [];
+    public $reduct;
+    public $log;
+
+    protected function setUp():void {
+        $this->log = new Logger("../data/app.log", false);
+        $this->reduct = new Reduction($this->log, "test-data/conf-c.json");
+    }
 
     public function testConstruct() {
-        $log = new Logger("../data/app.log", false);
-        $reduct = new Reduction($log, "test-data/conf-c.json");
 
-        $this->assertEquals($reduct->getVar("cpath"), "test-data/conf-c.json");
-        $this->assertEquals($reduct->getVar("mode"), "ImageSide");
-        $this->assertEquals($reduct->getVar("maxImageSide"), 480);
-        $this->assertEquals($reduct->getVar("ableTypes"), 
+        $this->assertEquals($this->reduct->getVar("cpath"), "test-data/conf-c.json");
+        $this->assertEquals($this->reduct->getVar("mode"), "ImageSide");
+        $this->assertEquals($this->reduct->getVar("maxImageSide"), 480);
+        $this->assertEquals($this->reduct->getVar("ableTypes"), 
             ["jpeg",
             "png",
             "gif"]);
-        $this->assertEquals($reduct->getVar("quality"), 
+        $this->assertEquals($this->reduct->getVar("quality"), 
             ["jpeg" => 75,
             "png" => 6]);
-    }
 
+    }
 
     public function testFullCicle() {
         // создаем 5 тестовых изображений размером 500х250
-        $this->generate(5, 500, "test-images");
-
-        $log = new Logger("../data/app.log", false);
-        $reduct = new Reduction($log, "test-data/conf-c.json");
+        $this->generate(5, 500, "test-images");        
         // получаем список в соответствии с conf-c.json
-        $reduct->getList();
+        $this->reduct->getList();
         
         // частично смотрим, правильно ли выбралось
-        $list = $reduct->getVar("list");
-        
+        $list = $this->reduct->getVar("list");
         $this->assertEquals(count($list), 5);
         
-        $image = $list[2];
+        $image = $list[rand(0, 4)];
         $this->assertEquals($image->type, "jpeg");
         $this->assertEquals($image->width, 500);
         $this->assertEquals($image->height, 250);
         $this->assertEquals($image->size, 2738);
         $this->assertEquals($image->orientation, 1);
         $list = null;
-        
-        // уменьшаем по стороне до 220 px 
-        $reduct->reductAll();
-        // смотрим на размеры одного из изображений
-        $size = getimagesize($this->paths[1]);
-        $this->assertEquals($size[0], 220);
-        $this->assertEquals($size[1], 110);
+
+        // уменьшаем по ширине до 220 px 
+        $this->reduct->reductAll();
+        // смотрим на новые размеры изображений
+        foreach ($this->paths as $path) {
+            $size = getimagesize($path);
+            $this->assertEquals($size[0], 220);
+            $this->assertEquals($size[1], 110);
+        }
+                
         // удаляем тестовые изображения
         $this->delete();
-        
+    
     }
 
     public function generate($qPic = 5, $width = 500, $dir = "test-images") {
