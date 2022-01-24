@@ -100,7 +100,7 @@ class Reduction {
         $bad = []; // пути файлов, не являющихся корректными изображениями
         
         foreach ($ri as $file) {
-            
+            // не рассматриваем, если это не файл
             if ($file->isFile() === false) continue;
 
             $e = $file->getExtension();
@@ -112,65 +112,63 @@ class Reduction {
                     $type = $ext;
                 }
             }
-
+            // не рассматриваем, если расширение не как у изображения
             if ($isImageExtension === false) continue;
 
             $exiftype = @exif_imagetype($file->getPathname());
-
+            // не рассматриваем, если корректная сигнатура не обнаружена,
+            // пишем в массив "побитых" изображений
             if ($exiftype === false) {
                 $bad[] = $file->getPathname();
+                continue;
+            }
+            // не рассматриваем, если нет в массиве ableTypes 
+            if (in_array($type, $this->ableTypes) === false) {
                 continue;
             }
             
             // элемент списка - объект, реализующий интерфейс Image, будет 
             // содержать свойства: type, path, size, width, height, orientation, quality
-
             if (key_exists($exiftype, $this->classes)) {
                 $class = sprintf("Reduction\%s", $this->classes[$exiftype]);
                 $image = new $class($this->log);
             } else {
                 continue;
             }
-             
-            if (in_array($type, $this->ableTypes)) {
-                $image->type = $type;               // type
-                $image->path = $file->getPathname();// path
-                $image->size = $file->getSize();    // size
 
-                switch ($exiftype) {                // orientation  
-                    case IMAGETYPE_JPEG:
-                        $exif = exif_read_data($image->path);
-                        
-                        if (!empty($exif["Orientation"])) {
-                            $image->orientation = $exif["Orientation"];
-                        } else {
-                            $image->orientation = 1;
-                        }
+            $image->type = $type;               // type
+            $image->path = $file->getPathname();// path
+            $image->size = $file->getSize();    // size
 
-                        $image->quality = $this->quality["jpeg"];
-                        break;
-                    case IMAGETYPE_PNG:
+            switch ($exiftype) {                // orientation  
+                case IMAGETYPE_JPEG:
+                    $exif = exif_read_data($image->path);
+                    
+                    if (!empty($exif["Orientation"])) {
+                        $image->orientation = $exif["Orientation"];
+                    } else {
                         $image->orientation = 1;
-                        $image->quality = $this->quality["png"];
-                        break;
-                    case IMAGETYPE_GIF:
-                        $image->orientation = 1;
-                        break;
-                    default:
-                        break;
-                }
+                    }
 
-                $is = getimagesize($image->path);
-                $image->width = $is[0];           // width
-                $image->height = $is[1];          // height
+                    $image->quality = $this->quality["jpeg"];
+                    break;
+                case IMAGETYPE_PNG:
+                    $image->orientation = 1;
+                    $image->quality = $this->quality["png"];
+                    break;
+                case IMAGETYPE_GIF:
+                    $image->orientation = 1;
+                    break;
+                default:
+                    break;
             }
 
-            // в зависимости от $mode решить включать ли изображение в список
-            $target = false;
+            $is = getimagesize($image->path);
+            $image->width = $is[0];           // width
+            $image->height = $is[1];          // height
 
-            if (isset($image->type)) {
-                $target = $this->filter($image);
-            }
+            // включать ли изображение в список?
+            $target = $this->filter($image);
 
             if ($target === true) {
                 $this->list[] = $image;  // пишем объект в массив
