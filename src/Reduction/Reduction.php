@@ -97,15 +97,31 @@ class Reduction {
         }
         
         $ri = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($this->folderPath), true);
+        $bad = []; // пути файлов, не являющихся корректными изображениями
         
         foreach ($ri as $file) {
             
-            if ($file->isFile() === false) continue; 
+            if ($file->isFile() === false) continue;
 
-            $exiftype = exif_imagetype($file->getPathname());
+            $e = $file->getExtension();
+            $isImageExtension = false;
 
-            if ($exiftype === false) continue;
+            foreach ($this->patterns as $ext => $pattern) {
+                if (preg_match($pattern, $e)) {
+                    $isImageExtension = true;
+                    $type = $ext;
+                }
+            }
 
+            if ($isImageExtension === false) continue;
+
+            $exiftype = @exif_imagetype($file->getPathname());
+
+            if ($exiftype === false) {
+                $bad[] = $file->getPathname();
+                continue;
+            }
+            
             // элемент списка - объект, реализующий интерфейс Image, будет 
             // содержать свойства: type, path, size, width, height, orientation, quality
 
@@ -116,44 +132,39 @@ class Reduction {
                 continue;
             }
              
-            $e = $file->getExtension();
+            if (in_array($type, $this->ableTypes)) {
+                $image->type = $type;               // type
+                $image->path = $file->getPathname();// path
+                $image->size = $file->getSize();    // size
 
-            foreach ($this->patterns as $type => $pattern) {
-                if (preg_match($pattern, $e)) {
-                    if (in_array($type, $this->ableTypes)) {
-                        $image->type = $type;               // type
-                        $image->path = $file->getPathname();// path
-                        $image->size = $file->getSize();    // size
-
-                        switch ($exiftype) {                // orientation  
-                            case IMAGETYPE_JPEG:
-                                $exif = exif_read_data($image->path);
-                                
-                                if (!empty($exif["Orientation"])) {
-                                    $image->orientation = $exif["Orientation"];
-                                } else {
-                                    $image->orientation = 1;
-                                }
-
-                                $image->quality = $this->quality["jpeg"];
-                                break;
-                            case IMAGETYPE_PNG:
-                                $image->orientation = 1;
-                                $image->quality = $this->quality["png"];
-                                break;
-                            case IMAGETYPE_GIF:
-                                $image->orientation = 1;
-                                break;
-                            default:
-                                break;
+                switch ($exiftype) {                // orientation  
+                    case IMAGETYPE_JPEG:
+                        $exif = exif_read_data($image->path);
+                        
+                        if (!empty($exif["Orientation"])) {
+                            $image->orientation = $exif["Orientation"];
+                        } else {
+                            $image->orientation = 1;
                         }
 
-                        $is = getimagesize($image->path);
-                        $image->width = $is[0];           // width
-                        $image->height = $is[1];          // height
-                    }
+                        $image->quality = $this->quality["jpeg"];
+                        break;
+                    case IMAGETYPE_PNG:
+                        $image->orientation = 1;
+                        $image->quality = $this->quality["png"];
+                        break;
+                    case IMAGETYPE_GIF:
+                        $image->orientation = 1;
+                        break;
+                    default:
+                        break;
                 }
+
+                $is = getimagesize($image->path);
+                $image->width = $is[0];           // width
+                $image->height = $is[1];          // height
             }
+
             // в зависимости от $mode решить включать ли изображение в список
             $target = false;
 
@@ -167,6 +178,11 @@ class Reduction {
 
             unset($image);
         }
+
+        if (count($bad) > 0) {
+            $this->log->notice("Файл не является корректным изображением:", $bad);
+        }
+
         return $this;
     }
 

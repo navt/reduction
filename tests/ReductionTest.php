@@ -38,16 +38,17 @@ class ReductionTest extends TestCase {
     }
 
     public function testFullCicle() {
-        // создаем 5 тестовых изображений размером 500х250
-        $this->generate(5, 500, "test-images");        
+        $q = 5;
+        // создаем $q тестовых изображений размером 500х250
+        $this->generate($q, 500, "test-images");        
         // получаем список в соответствии с conf-c.json
         $this->reduct->getList();
         
         // частично смотрим, правильно ли выбралось
         $list = $this->reduct->getVar("list");
-        $this->assertEquals(count($list), 5);
+        $this->assertEquals(count($list), $q);
         
-        $image = $list[rand(0, 4)];
+        $image = $list[rand(0, $q-1)];
         $this->assertEquals($image->type, "jpeg");
         $this->assertEquals($image->width, 500);
         $this->assertEquals($image->height, 250);
