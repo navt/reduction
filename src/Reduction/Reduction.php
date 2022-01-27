@@ -114,6 +114,11 @@ class Reduction {
             }
             // не рассматриваем, если расширение не как у изображения
             if ($isImageExtension === false) continue;
+            
+            // не рассматриваем, если нет в массиве ableTypes 
+            if (in_array($type, $this->ableTypes) === false) {
+                continue;
+            }
 
             $exiftype = @exif_imagetype($file->getPathname());
             // не рассматриваем, если корректная сигнатура не обнаружена,
@@ -122,11 +127,7 @@ class Reduction {
                 $bad[] = $file->getPathname();
                 continue;
             }
-            // не рассматриваем, если нет в массиве ableTypes 
-            if (in_array($type, $this->ableTypes) === false) {
-                continue;
-            }
-            
+
             // элемент списка - объект, реализующий интерфейс Image, будет 
             // содержать свойства: type, path, size, width, height, orientation, quality
             if (key_exists($exiftype, $this->classes)) {
