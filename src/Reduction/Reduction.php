@@ -96,7 +96,9 @@ class Reduction {
             exit();
         }
         
-        $ri = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($this->folderPath), true);
+        $ri = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($this->folderPath),
+            \RecursiveIteratorIterator::SELF_FIRST);
         $bad = []; // пути файлов, не являющихся корректными изображениями
         
         foreach ($ri as $file) {

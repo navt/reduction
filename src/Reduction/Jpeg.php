@@ -38,21 +38,16 @@ class Jpeg extends Image {
         switch ($this->orientation) {
             case 1:
                 return $this->width;
-                break;
             case 6:
                 return $this->height;
-                break;
             case 8:
                 return $this->height;
-                break;
             case 3:
                 return $this->width;
-                break;
             default:
                 throw new AppException(
                     __METHOD__." Не определён вариант поворота для Orientation {$this->orientation} {$this->path}"
                 );
-                break;
         }
     }
 
@@ -61,21 +56,16 @@ class Jpeg extends Image {
         switch ($this->orientation) {
             case 1:
                 return $this->height;
-                break;
             case 6:
                 return $this->width;
-                break;
             case 8:
                 return $this->width;
-                break;
             case 3:
                 return $this->height;
-                break;
             default:
                 throw new AppException(
                     __METHOD__." Не определён вариант поворота для Orientation {$this->orientation} {$this->path}"
                 );
-                break;
         }
     }
 
