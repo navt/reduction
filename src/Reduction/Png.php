@@ -11,12 +11,7 @@ use Logger\Logger;
 use Reduction\AppException;
 use Reduction\Image;
 
-class Png implements Image {
-
-    public $path;
-    public $width;
-    public $height;
-    public $quality;
+class Png extends Image {
 
     public function getAngle() {
         return 0;

@@ -11,13 +11,7 @@ use Logger\Logger;
 use Reduction\AppException;
 use Reduction\Image;
 
-class Jpeg implements Image {
-
-    public $path;
-    public $width;
-    public $height;
-    public $quality;
-    public $orientation;
+class Jpeg extends Image {
 
     public function getAngle() {
 

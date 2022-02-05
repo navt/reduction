@@ -12,11 +12,7 @@ use Reduction\AppException;
 use Reduction\Image;
 use \Imagick;
 
-class Gif implements Image {
-
-    public $path;
-    public $width;
-    public $height;
+class Gif extends Image {
 
     private $src = "";
     // взято отсюда: 

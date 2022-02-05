@@ -7,19 +7,24 @@
  */
 namespace Reduction;
 
-interface Image {
-    /*
-     *  объект, реализующий Image, будет содержать свойства: 
-     *  type, path, size, width, height, orientation, quality
-     */
-    public function getAngle(); 
+abstract class Image {
 
-    public function getRealWidth(); 
+    public $type;        // jpeg | png | gif
+    public $path;        // относительный путь к изображению
+    public $size;        // размер изображения в байтах
+    public $width;       // ширина в рх
+    public $height;      // высота в рх
+    public $orientation; // для jpeg
+    public $quality;     // качество для изображения нового размера
 
-    public function getRealHeight();
+    abstract public function getAngle(); 
 
-    public function getRealAspectRatio();
+    abstract public function getRealWidth(); 
 
-    public function buildNewImage($width, $height);
+    abstract public function getRealHeight();
+
+    abstract public function getRealAspectRatio();
+
+    abstract public function buildNewImage($width, $height);
 
 }
