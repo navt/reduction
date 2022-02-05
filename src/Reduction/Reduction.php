@@ -20,7 +20,7 @@ class Reduction {
     
     private $log;        // логгер
 
-    private $cpaph;      // путь к файлу конфигурации
+    private $cpath;      // путь к файлу конфигурации
     private $folderPath; // путь к директории изображений
                          // 2 варианта фильтрации изображений:
     private $mode;       // "FileSize" / "ImageSide"
@@ -105,6 +105,7 @@ class Reduction {
 
             $e = $file->getExtension();
             $isImageExtension = false;
+            $type = "dummy";
 
             foreach ($this->patterns as $ext => $pattern) {
                 if (preg_match($pattern, $e)) {
@@ -132,7 +133,7 @@ class Reduction {
             // содержать свойства: type, path, size, width, height, orientation, quality
             if (key_exists($exiftype, $this->classes)) {
                 $class = sprintf("Reduction\%s", $this->classes[$exiftype]);
-                $image = new $class($this->log);
+                $image = new $class();
             } else {
                 continue;
             }
@@ -215,10 +216,9 @@ class Reduction {
                     $height = $this->maxHeight;
                     $width = (int)($this->maxHeight * $rar);
                     break;
-                case $rar == 1:
+                default:     // case $rar == 1:
                     $width = $this->maxHeight;
                     $height = $this->maxHeight;
-                    break;
             }
             // уменьшение исходного изображения, перезапись файла
             $effect = $image->buildNewImage($width, $height);

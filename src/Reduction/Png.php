@@ -13,9 +13,10 @@ use Reduction\Image;
 
 class Png implements Image {
 
-    public function __construct(Logger $log) {
-        $this->log = $log;
-    }
+    public $path;
+    public $width;
+    public $height;
+    public $quality;
 
     public function getAngle() {
         return 0;

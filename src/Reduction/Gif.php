@@ -14,14 +14,14 @@ use \Imagick;
 
 class Gif implements Image {
 
+    public $path;
+    public $width;
+    public $height;
+
     private $src = "";
     // взято отсюда: 
     // https://www.php.net/manual/ru/function.imagecreatefromgif.php#104473
     private $pattern = '~\x00\x21\xF9\x04.{4}\x00(\x2C|\x21)~s';
-    
-    public function __construct(Logger $log) {
-        $this->log = $log;
-    }
 
     public function getAngle() {
         return 0;

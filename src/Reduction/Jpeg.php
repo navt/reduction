@@ -13,9 +13,11 @@ use Reduction\Image;
 
 class Jpeg implements Image {
 
-    public function __construct(Logger $log) {
-        $this->log = $log;
-    }
+    public $path;
+    public $width;
+    public $height;
+    public $quality;
+    public $orientation;
 
     public function getAngle() {
 

@@ -58,6 +58,7 @@ class Marker {
         $delta = $this->markers[count($this->markers)-1] - $this->markers[0];
         
         $bytes = memory_get_peak_usage(true);
+        $memory = "не определен";
 
         for ($i=0; $i < count($this->volumes); $i++) { 
             if ($bytes > $this->volumes[$i] && $bytes <= $this->volumes[$i+1]) {
