@@ -71,7 +71,7 @@ class Logger implements LoggerInterface
         
         if ($this->active === false) return;
 
-        if (is_string($message) === false) {
+        if (!is_string($message)) {
             $s = var_export($message, true);
             throw new InvalidArgumentException("Аргумент message {$s} должен быть строкой");
         }
