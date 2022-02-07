@@ -9,22 +9,56 @@ namespace Reduction;
 
 abstract class Image {
 
-    public $type;        // jpeg | png | gif
-    public $path;        // относительный путь к изображению
-    public $size;        // размер изображения в байтах
-    public $width;       // ширина в рх
-    public $height;      // высота в рх
-    public $orientation; // для jpeg
-    public $quality;     // качество для изображения нового размера
+    /**
+     * тип изображения: jpeg | png | gif
+     * @var string
+     */
+    public string $type;
 
-    abstract public function getAngle(); 
+    /**
+     * относительный путь к изображению
+     * @var string
+     */
+    public string $path;
 
-    abstract public function getRealWidth(); 
+    /**
+     * размер изображения в байтах
+     * @var int
+     */
+    public int $size;
 
-    abstract public function getRealHeight();
+    /**
+     * ширина в рх
+     * @var int
+     */
+    public int $width;
 
-    abstract public function getRealAspectRatio();
+    /**
+     * высота в рх
+     * @var int
+     */
+    public int $height;
 
-    abstract public function buildNewImage($width, $height);
+    /**
+     * ориентация  для jpeg: 1 | 3 | 6 | 8
+     * @var int
+     */
+    public int $orientation;
+
+    /**
+     * качество для изображения нового размера
+     * @var int
+     */
+    public int $quality;     
+
+    abstract public function getAngle(): int; 
+
+    abstract public function getRealWidth(): int; 
+
+    abstract public function getRealHeight(): int;
+
+    abstract public function getRealAspectRatio(): float;
+
+    abstract public function buildNewImage(int $width, int $height): bool;
 
 }

@@ -13,23 +13,23 @@ use Reduction\Image;
 
 class Png extends Image {
 
-    public function getAngle() {
+    public function getAngle(): int {
         return 0;
     }
 
-    public function getRealWidth() {
+    public function getRealWidth(): int {
         return $this->width;
     }
 
-    public function getRealHeight() {
+    public function getRealHeight(): int {
         return $this->height;
     }
 
-    public function getRealAspectRatio() {
+    public function getRealAspectRatio(): float {
         return $this->getRealWidth()/$this->getRealHeight();
     }
 
-    public function buildNewImage($width, $height) {
+    public function buildNewImage(int $width, int $height): bool {
         // уменьшение исходного изображения, перезапись файла
         $src = imagecreatefrompng($this->path);
         

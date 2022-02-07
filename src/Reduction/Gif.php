@@ -14,28 +14,28 @@ use \Imagick;
 
 class Gif extends Image {
 
-    private $src = "";
+    private string $src = "";
     // взято отсюда: 
     // https://www.php.net/manual/ru/function.imagecreatefromgif.php#104473
-    private $pattern = '~\x00\x21\xF9\x04.{4}\x00(\x2C|\x21)~s';
+    private string $pattern = '~\x00\x21\xF9\x04.{4}\x00(\x2C|\x21)~s';
 
-    public function getAngle() {
+    public function getAngle(): int {
         return 0;
     }
 
-    public function getRealWidth() {
+    public function getRealWidth(): int {
         return $this->width;
     }
 
-    public function getRealHeight() {
+    public function getRealHeight(): int {
         return $this->height;
     }
 
-    public function getRealAspectRatio() {
+    public function getRealAspectRatio(): float {
         return $this->getRealWidth()/$this->getRealHeight();
     }
 
-    public function buildNewImage($width, $height) {
+    public function buildNewImage(int $width, int $height): bool {
         
         $this->src = file_get_contents($this->path);
 
@@ -62,7 +62,7 @@ class Gif extends Image {
     
     }
 
-    private function useGD($width, $height) {
+    private function useGD(int $width, int $height): bool {
 
 
         $image = imagecreatefromstring($this->src);
@@ -97,7 +97,7 @@ class Gif extends Image {
         return $effect;
     }
 
-    private function useImagick($width, $height) {
+    private function useImagick(int $width, int $height): bool {
         
         if (extension_loaded("imagick") === false) {
             throw new AppException(__METHOD__." Модуль PHP imagick не загружен.");

@@ -12,13 +12,29 @@ namespace Reduction;
 use Logger\Logger;
 
 class Marker {
-    private $log;
-    private $markers = [];
-    private $volumes = [1, 1024, 1048576, 1073741824, 1099511627776];
-    private $units = ["B", "KB", "MB", "GB", "TB"];
+    /**
+     * @var Logger
+     */
+    private Logger $log;
+
+    /**
+     * @var array<float>
+     */
+    private array $markers = [];
+
+    /**
+     * @var array<int>
+     */
+    private array $volumes = [1, 1024, 1048576, 1073741824, 1099511627776];
+
+    /**
+     * @var array<string>
+     */
+    private array $units = ["B", "KB", "MB", "GB", "TB"];
 
     public function __construct(Logger $log) {
         $this->log = $log;
+        
         // первая метка устанавливается по началу запроса к скрипту или
         // по факту создании экземпляра класса Marker
         if (isset($_SERVER["REQUEST_TIME_FLOAT"]) && is_float($_SERVER["REQUEST_TIME_FLOAT"])) {
@@ -29,11 +45,11 @@ class Marker {
         }
     }
 
-    public function addMark() {
+    public function addMark(): void {
         $this->markers[] = microtime(true);
     }
 
-    public function display() {
+    public function display(): void {
         
         if (count($this->markers) < 2) {
             $m = __METHOD__." Нет данных для отображения меток.";
@@ -51,7 +67,7 @@ class Marker {
         $this->sumUp();
     }
 
-    public function sumUp() {
+    public function sumUp(): void {
         // это крайняя метка, таким образом при создании экземпляра Marker, а
         // впоследствии вызове Marker::sumUp должны быть созданы минимум 2 метки
         $this->addMark();

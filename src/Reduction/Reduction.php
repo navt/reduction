@@ -17,30 +17,87 @@ use Reduction\Image;
 
 
 class Reduction {
+    /**
+     * логгер
+     * @var Logger 
+     */
+    private Logger $log;
+
+    /**
+     * путь к файлу конфигурации
+     * @var string  
+     */
+    private string $cpath;
+
+    /**
+     * путь к директории изображений
+     * @var string   
+     */
+    private string $folderPath; 
+ 
+    /**
+     * варианты фильтрации изображений: "FileSize" / "ImageSide"
+     * @var string   
+     */
+    private string $mode;
+
+    /**
+     * размер файла, с которого начнется фильтрация или
+     * @var int   
+     */
+    private int $maxFileSize;
     
-    private $log;        // логгер
+    /**
+     * размер длинной стороны изображения, с которого начнется фильтрация
+     * @var int   
+     */
+    private int $maxImageSide;
 
-    private $cpath;      // путь к файлу конфигурации
-    private $folderPath; // путь к директории изображений
-                         // 2 варианта фильтрации изображений:
-    private $mode;       // "FileSize" / "ImageSide"
-    private $maxFileSize;  // по размеру файла, с которого начнется фильтрация или
-    private $maxImageSide; // по размеру длинной стороны изображения, с которого начнется фильтрация
+    /**
+     * ширина новых изображений, если изображения горизонтальные
+     * @var int  
+     */
+    private int $maxWidth;
 
-    private $maxWidth;   // ширина новых изображений, если изображения горизонтальные
-    private $maxHeight;  // высота новых изображений, если изображения вертикальные
-    private $ableTypes;  // типы принимаемых в работу файлов
-    private $quality;    // quality для функкций типа imagejpeg, imagepng
+    /**
+     * высота новых изображений, если изображения вертикальные
+     * @var int 
+     */
+    private int $maxHeight;
+    
+    /**
+     * типы принимаемых в работу файлов
+     * @var array<string> 
+     */
+    private array $ableTypes;
 
-    private $list = [];  // список обнаруженных файлов
-  
-    private $patterns = [
+    /**
+     * quality для функкций типа imagejpeg, imagepng
+     * @var array<int>    
+     */
+    private array $quality;
+
+    /**
+     * данные об обнаруженных файлах изображений
+     * @var array<Image>   
+     */
+    private array $list = [];
+    
+    /**
+     * паттерны для фильтрации по расширению файла
+     * @var mixed[]  
+     */
+    private array $patterns = [
         "jpeg" => "~^(jpg|jpeg)$~i",
         "png" => "~^png$~i",
         "gif" => "~^gif$~i"
     ];
-
-    private $classes = [
+    
+    /**
+     * названия классов для генерации объектов
+     * @var mixed[]
+     */
+    private array $classes = [
         IMAGETYPE_GIF => "Gif",
         IMAGETYPE_JPEG => "Jpeg",
         IMAGETYPE_PNG => "Png"
@@ -50,6 +107,7 @@ class Reduction {
         $this->cpath = $cpath;
         $this->log = $log;
         $s = $this->readConfig();
+
         try {
             $a = json_decode($s, true);
             if ($a === NULL) {
@@ -67,7 +125,7 @@ class Reduction {
         $this->log->info("Заданы значения:", $a);
     }
 
-    private function readConfig() {
+    private function readConfig(): string {
         try {
             if (is_file($this->cpath) === false) {
                 $m = sprintf("%s Неверно задан путь к файлу конфигурации; %s", __METHOD__, $this->cpath);
@@ -85,7 +143,7 @@ class Reduction {
         return $s;
     }
     
-    public function getList() {
+    public function getList(): object {
 
         try {
             if (is_dir($this->folderPath) !== true) {
@@ -148,7 +206,7 @@ class Reduction {
                 case IMAGETYPE_JPEG:
                     $exif = exif_read_data($image->path);
                     
-                    if (!empty($exif["Orientation"])) {
+                    if (is_array($exif) && !empty($exif["Orientation"])) {
                         $image->orientation = $exif["Orientation"];
                     } else {
                         $image->orientation = 1;
@@ -168,9 +226,12 @@ class Reduction {
             }
 
             $is = getimagesize($image->path);
-            $image->width = $is[0];           // width
-            $image->height = $is[1];          // height
 
+            if (is_array($is)) {
+                $image->width = $is[0];           // width
+                $image->height = $is[1];          // height
+            }
+            
             // включать ли изображение в список?
             $target = $this->filter($image);
 
@@ -188,7 +249,7 @@ class Reduction {
         return $this;
     }
 
-    private function filter(Image $image) {
+    private function filter(Image $image): bool {
         
         if (in_array($this->mode, ["FileSize", "ImageSide"]) === false) {
             throw new AppException(__METHOD__." Не выбран режим фильтрации.");
@@ -198,14 +259,13 @@ class Reduction {
             return ($image->size > $this->maxFileSize) ?  true : false;
         }
         
-        if ($this->mode === "ImageSide") {
-            return ($image->width > $this->maxImageSide || $image->height > $this->maxImageSide)
-                ? true : false;
-        }
+        // $this->mode === "ImageSide" 
+        return ($image->width > $this->maxImageSide || $image->height > $this->maxImageSide)
+            ? true : false;
         
     }
 
-    private function reduct(Image $image) {
+    private function reduct(Image $image): bool {
         try {
             $rar = $image->getRealAspectRatio();
 
@@ -234,7 +294,7 @@ class Reduction {
         return $effect;
     }
     
-    public function reductAll() {
+    public function reductAll(): void {
         $i = 0;
         $ts = 0; // total size
 
@@ -270,7 +330,7 @@ class Reduction {
 
     }
 
-    public function printList() {
+    public function printList(): object {
         $ts = 0; // total size
         $this->log->info("Список выбранных изображений");
 
@@ -294,6 +354,7 @@ class Reduction {
         return $this;
     }
 
+    /** @phpstan-ignore-next-line */
     public function getVar(string $name="") {
         return isset($this->$name) ? $this->$name : null;
     }

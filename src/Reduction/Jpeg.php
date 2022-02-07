@@ -13,7 +13,7 @@ use Reduction\Image;
 
 class Jpeg extends Image {
 
-    public function getAngle() {
+    public function getAngle(): int {
 
         // соответствие orientation углу поворота изображения
         $mapping = [
@@ -33,7 +33,7 @@ class Jpeg extends Image {
     
     }
 
-    public function getRealWidth() {
+    public function getRealWidth(): int {
 
         switch ($this->orientation) {
             case 1:
@@ -51,7 +51,7 @@ class Jpeg extends Image {
         }
     }
 
-    public function getRealHeight() {
+    public function getRealHeight(): int {
 
         switch ($this->orientation) {
             case 1:
@@ -69,11 +69,11 @@ class Jpeg extends Image {
         }
     }
 
-    public function getRealAspectRatio() {
+    public function getRealAspectRatio(): float {
         return $this->getRealWidth()/$this->getRealHeight();
     }
 
-    public function buildNewImage($width, $height) {
+    public function buildNewImage(int $width, int $height): bool {
         // уменьшение исходного изображения, перезапись файла
         $src = imagecreatefromjpeg($this->path);
         
@@ -89,7 +89,11 @@ class Jpeg extends Image {
         }
 
         $new = imagecreatetruecolor($width, $height);
-        imagecopyresampled ($new, $src, 0, 0, 0, 0, $width, $height, $this->getRealWidth(), $this->getRealHeight());
+
+        imagecopyresampled (
+            $new, $src, 0, 0, 0, 0, 
+            $width, $height, $this->getRealWidth(), $this->getRealHeight()
+        );
 
         $effect = imagejpeg($new, $this->path, $this->quality);
         imagedestroy($new);

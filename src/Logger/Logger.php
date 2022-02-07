@@ -15,8 +15,8 @@ use DateTime;
 
 class Logger implements LoggerInterface
 {
-    private $active;
-    private $logPath;
+    private bool $active;
+    private string $logPath;
     
     public function __construct(string $logPath="data/app.log", bool $active=true) {
         
@@ -85,8 +85,12 @@ class Logger implements LoggerInterface
             $this->displayContext($context));
         file_put_contents($this->logPath, $out, FILE_APPEND);
     }
-
-    private function displayContext(array $context=[]) {
+    
+    /**
+     * @param mixed[] $context
+     * @return string
+     */
+    private function displayContext(array $context=[]): string {
         return ($context == []) ? "" : json_encode($context, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT).PHP_EOL;
     }
 
