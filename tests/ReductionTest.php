@@ -1,7 +1,7 @@
 <?php
 chdir(__DIR__);
 require_once dirname(__DIR__).'/src/Loader/Loader.php';
-\Loader\Loader::autoload(true, dirname(__DIR__)."/src");
+\Loader\Loader::autoload(true, [dirname(__DIR__)."/src"]);
 
 use PHPUnit\Framework\TestCase;
 use Logger\Logger;

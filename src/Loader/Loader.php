@@ -13,7 +13,7 @@ class Loader
     /**
      * Autoload directories.
      *
-     * @var array
+     * @var mixed[]
      */
     protected static $dirs = [];
 
@@ -21,9 +21,9 @@ class Loader
      * Starts/stops autoloader.
      *
      * @param bool $enabled Enable/disable autoloading
-     * @param array $dirs Autoload directories
+     * @param mixed[] $dirs Autoload directories
      */
-    public static function autoload($enabled = true, $dirs = array()) {
+    public static function autoload(bool $enabled = true, array $dirs = []):void {
         if ($enabled) {
             spl_autoload_register(array(__CLASS__, 'loadClass'));
         }
@@ -41,7 +41,7 @@ class Loader
      *
      * @param string $class Class name
      */
-    public static function loadClass($class) {
+    public static function loadClass(string $class): void {
         $class_file = str_replace(array('\\', '_'), '/', $class).'.php';
         foreach (self::$dirs as $dir) {
             $file = $dir.'/'.$class_file;
@@ -55,17 +55,20 @@ class Loader
     /**
      * Adds a directory for autoloading classes.
      *
-     * @param mixed $dir Directory path
+     * @param mixed[] $dir Directory path
      */
-    public static function addDirectory($dir) {
-        if (is_array($dir) || is_object($dir)) {
+    public static function addDirectory(array $dir): void {
+        
+        if (is_array($dir)) {
             foreach ($dir as $value) {
-                self::addDirectory($value);
+                if (is_array($value)) {
+                    self::addDirectory($value);
+                } else if (is_string($value)) {
+                    if (!in_array($value, self::$dirs)) self::$dirs[] = $value;
+                }
             }
         }
-        else if (is_string($dir)) {
-            if (!in_array($dir, self::$dirs)) self::$dirs[] = $dir;
-        }
+
     }
 
 }

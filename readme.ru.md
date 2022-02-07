@@ -19,7 +19,7 @@
 ```php
 chdir(__DIR__);
 require_once __DIR__.'/src/Loader/Loader.php';
-\Loader\Loader::autoload(true, __DIR__."/src");
+\Loader\Loader::autoload(true, [__DIR__."/src"]);
 
 use Logger\Logger;
 use Reduction\Marker;
