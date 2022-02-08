@@ -20,11 +20,13 @@ Thus, the code for a typical application might look like this:<br>
 ```php
 chdir(__DIR__);
 require_once __DIR__.'/src/Loader/Loader.php';
-\Loader\Loader::autoload(true, [__DIR__."/src"]);
 
+use Loader\Loader;
 use Logger\Logger;
 use Reduction\Marker;
 use Reduction\Reduction;
+
+Loader::autoload(true, [__DIR__."/src"]);
 
 $log = new Logger("data/app.log");
 $marker = new Marker($log);

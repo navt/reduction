@@ -37,9 +37,11 @@ class Gif extends Image {
 
     public function buildNewImage(int $width, int $height): bool {
         
-        $this->src = file_get_contents($this->path);
+        $s = file_get_contents($this->path);
 
-        if ($this->src === false) return false;
+        if ($s === false) return false;
+
+        $this->src = $s;
         // определяем имеется ли анимация в данном изображении
         $offset = 0;
         $count = 0;
@@ -72,19 +74,22 @@ class Gif extends Image {
 
         $new = imagecreatetruecolor($width, $height);
         
-        //Получаем прозрачный цвет
+        // получаем прозрачный цвет
         $transparent = imagecolortransparent($image);
 
-        //Проверяем наличие прозрачности
+        // проверяем наличие прозрачности
         if($transparent !== -1){
             $transparentColor = imagecolorsforindex($image, $transparent);
         
-            //Добавляем цвет в палитру нового изображения, и устанавливаем его как прозрачный
-            $destIndex=imagecolorallocate($new, $transparentColor['red'], $transparentColor['green'], $transparentColor['blue']);
-            imagecolortransparent($new, $destIndex);
-        
-            //На всякий случай заливаем фон этим цветом
-            imagefill($new, 0, 0, $destIndex);
+            if (is_array($transparentColor)) {
+                // добавляем цвет в палитру нового изображения
+                $destIndex=imagecolorallocate($new, $transparentColor['red'], $transparentColor['green'], $transparentColor['blue']);
+                // и устанавливаем его как прозрачный
+                imagecolortransparent($new, $destIndex);
+                // заливаем фон этим цветом
+                imagefill($new, 0, 0, $destIndex);
+            }
+            
         }
 
         imagecopyresampled ($new, $image, 0, 0, 0, 0, $width, $height, $this->getRealWidth(), $this->getRealHeight());
