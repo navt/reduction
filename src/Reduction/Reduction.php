@@ -189,7 +189,7 @@ class Reduction {
                 continue;
             }
 
-            // элемент списка - объект, реализующий интерфейс Image, будет 
+            // элемент списка - объект, реализующий абстрактный класс Image, будет 
             // содержать свойства: type, path, size, width, height, orientation, quality
             if (key_exists($exiftype, $this->classes)) {
                 $class = sprintf("Reduction\%s", $this->classes[$exiftype]);

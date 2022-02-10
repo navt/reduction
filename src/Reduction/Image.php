@@ -1,5 +1,6 @@
 <?php
 /**
+ * Image - класс-шаблон для сущности Image, общей для классов Jpeg, Png, Gif
  * Этот файл часть reduction 
  *
  * @copyright Copyright (c) 2022, Борис Федоров <w-navt@yandex.ru>

@@ -7,7 +7,6 @@
  */
 namespace Reduction;
 
-use Logger\Logger;
 use Reduction\AppException;
 use Reduction\Image;
 use \Imagick;
