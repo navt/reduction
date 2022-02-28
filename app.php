@@ -3,14 +3,11 @@ error_reporting(E_ALL);
 ini_set('display_errors', "1");
 
 chdir(__DIR__);
-require_once __DIR__.'/src/Loader/Loader.php';
+require_once __DIR__.'/vendor/autoload.php';
 
-use Loader\Loader;
-use Logger\Logger;
-use Reduction\Marker;
-use Reduction\Reduction;
-
-Loader::autoload(true, [__DIR__."/src"]);
+use navt\Reduction\Logger\Logger;
+use navt\Reduction\Marker;
+use navt\Reduction\Reduction;
 
 $log = new Logger("data/app.log");
 $marker = new Marker($log);

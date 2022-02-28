@@ -6,7 +6,7 @@
  * @copyright Copyright (c) 2022, Борис Федоров <w-navt@yandex.ru>
  * @license   MIT
  */
-namespace Reduction;
+namespace navt\Reduction;
 
 abstract class Image {
 

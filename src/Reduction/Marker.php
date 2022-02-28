@@ -7,9 +7,9 @@
  * @copyright Copyright (c) 2020, Борис Федоров <w-navt@yandex.ru>
  * @license   MIT
  */
-namespace Reduction;
+namespace navt\Reduction;
 
-use Logger\Logger;
+use navt\Reduction\Logger\Logger;
 
 class Marker {
     /**

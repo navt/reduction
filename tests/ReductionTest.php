@@ -1,11 +1,10 @@
 <?php
 chdir(__DIR__);
-require_once dirname(__DIR__).'/src/Loader/Loader.php';
-\Loader\Loader::autoload(true, [dirname(__DIR__)."/src"]);
+require_once dirname(__DIR__).'/vendor/autoload.php';
 
 use PHPUnit\Framework\TestCase;
-use Logger\Logger;
-use Reduction\Reduction;
+use navt\Reduction\Logger\Logger;
+use navt\Reduction\Reduction;
 
 use Reduction\Image;
 use Reduction\Jpeg;

@@ -1,0 +1,21 @@
+{
+    "name": "navt/reduction",
+    "description": "Optimization of images size on the site",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "navt\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Boris Fedorov",
+            "email": "w-navt@yandex.ru"
+        }
+    ],
+    "require": {
+        "php": ">=7.2.0",
+        "psr/log": "^1.1"
+    }
+}

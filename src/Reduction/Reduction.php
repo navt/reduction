@@ -9,11 +9,11 @@
  * @copyright Copyright (c) 2020, Борис Федоров <w-navt@yandex.ru>
  * @license   MIT
  */
-namespace Reduction;
+namespace navt\Reduction;
 
-use Logger\Logger;
-use Reduction\AppException;
-use Reduction\Image;
+use navt\Reduction\Logger\Logger;
+use navt\Reduction\AppException;
+use navt\Reduction\Image;
 
 
 class Reduction {
@@ -192,7 +192,7 @@ class Reduction {
             // элемент списка - объект, реализующий абстрактный класс Image, будет 
             // содержать свойства: type, path, size, width, height, orientation, quality
             if (key_exists($exiftype, $this->classes)) {
-                $class = sprintf("Reduction\%s", $this->classes[$exiftype]);
+                $class = sprintf("navt\Reduction\%s", $this->classes[$exiftype]);
                 $image = new $class();
             } else {
                 continue;

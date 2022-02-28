@@ -2,7 +2,7 @@
 /**
  * Этот файл часть reduction
  */
-namespace Reduction;
+namespace navt\Reduction;
 
 class AppException extends \Exception {
 

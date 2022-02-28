@@ -5,3 +5,5 @@
 /tests/phpunit.phar
 /tests/.phpunit.result.cache
 /tests/phpunit
+/vendor/*
+/composer.lock
