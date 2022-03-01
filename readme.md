@@ -23,7 +23,7 @@ Consider the case where you place the `vendor` directory in the root directory o
 # go to the root directory of site
 $ cd root-of-site
 # require package navt/reduction
-$ composer require navt/reduction
+$ composer require navt/reduction:dev-master
 # make sure that there is no app.php file and no data directory in the root directory.
 # copy 
 $ cp vendor/navt/reduction/app.php ./

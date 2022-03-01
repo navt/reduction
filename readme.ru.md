@@ -21,7 +21,7 @@
 # перейдите в корневую директорию сайта
 $ cd root-of-site
 # потребуйте пакет navt/reduction
-$ composer require navt/reduction
+$ composer require navt/reduction:dev-master
 # убедитесь, что в корневой директории нет файла app.php и директории data.
 # выполните копирование  
 $ cp vendor/navt/reduction/app.php ./
