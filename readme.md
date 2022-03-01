@@ -6,7 +6,7 @@ You can select images not only by the file size, but also by the size of the "lo
 To navigate how much the application is running in time and consumes memory, the Marker class is written. The results are written to the log. <br> <br>
 
 Let's look at the file `data/config.json`, in it: <br>
-`"folderPath"` - path to the images directory, relative to the `reduction` directory <br>
+`"folderPath"` - relative path to target images directory from `app.php`<br>
 `"mode"` - mode for selecting images either `"ImageSide"`, or `"FileSize"` <br>
 `"maxFileSize"` - in the `"FileSize"` mode, files larger than the specified size in bytes will be selected <br>
 `"maxImageSide"` - in the `"ImageSide"` mode, files with a long side larger than the value in pixels specified here will be selected <br>
@@ -15,18 +15,36 @@ Let's look at the file `data/config.json`, in it: <br>
 `"ableTypes"` - array of file extensions, optionally there should be 3 values, select one or two for "dot" work <br>
 `"quality"` - the `quality` parameter when recording jpeg and png images using the imagejpeg(), imagepng() functions<br><br>
 
-Thus, the code for a typical application might look like this:<br>
+
+
+## Usage
+Consider the case where you place the `vendor` directory in the root directory of your site.
+```bash
+# go to the root directory of site
+$ cd root-of-site
+# require package navt/reduction
+$ $ composer require navt/reduction
+# make sure that there is no app.php file and no data directory in the root directory.
+# copy 
+$ cp vendor/navt/reduction/app.php ./
+$ cp -r vendor/navt/reduction/data ./
+```
+Edit` data/config.json` and `app.php` in accordance with your current task.<br>
+Run
+```bash
+$ php -f app.php
+```
+Initially, the `app.php` file contains the code to inspect the target directory. If you decide that it is time to reduce the size of the selected files, then the code in `app.php` should be changed to:
 
 ```php
+<?php
+
 chdir(__DIR__);
-require_once __DIR__.'/src/Loader/Loader.php';
+require_once __DIR__.'/vendor/autoload.php';
 
-use Loader\Loader;
-use Logger\Logger;
-use Reduction\Marker;
-use Reduction\Reduction;
-
-Loader::autoload(true, [__DIR__."/src"]);
+use navt\Reduction\Logger\Logger;
+use navt\Reduction\Marker;
+use navt\Reduction\Reduction;
 
 $log = new Logger("data/app.log");
 $marker = new Marker($log);
@@ -51,20 +69,9 @@ $marker->addMark();
 $marker->display();
 ```
 
-See also `app.php` file <br>
-
-## Usage
-Place the contents of this repository on the server in the `reduction` directory, like so
-```bash
-$ git clone https://github.com/navt/reduction.git
-```
-Edit` data/config.json` and `app.php` in accordance with your current task.<br>
-In the console go to the `reduction` directory. Run the script<br>
-`$ php -f app.php` <br>
-Using the console is preferable because with a large enough volume of images, the application will take time to complete the task. Conduct an evaluation run with a small number of files to understand how fast the utility works.<br>
-Take care of the security of your data: make a dump of the directories where you plan to carry out work, run the script on the test data on the local computer, see if the result is satisfactory to you.
-
 ### Peculiars
+Using the console is preferable because with a large enough volume of images, the application will take time to complete the task. Conduct an evaluation run with a small number of files to understand how fast the utility works.<br>
+Take care of the integrity of your data: make a dump of the directories where you plan to carry out work, run the script on the test data on the local computer, see if the result is satisfactory to you.<br>
 To work with jpeg, png and gif images without animation, the PHP module `gd` will be used.<br>
-To work with gif-images that have several layers (animation), the PHP module `imagick` must be installed on your server. If there is no such module, then animated gifs will not be overwritten.<br>
+To work with gif-images that have several layers (animation), the PHP module `imagick` must be installed on your server. If there is no such module, then animated gifs will not be affected.<br>
 If you're going to scale down gifs that have multiple layers, consider running the gif-only utility separately.
