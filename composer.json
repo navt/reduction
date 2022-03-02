@@ -1,6 +1,13 @@
 {
     "name": "navt/reduction",
     "description": "Optimization of images size on the site",
+    "keywords": [
+		"image",
+		"resize",
+		"reduction",
+		"imagick",
+		"gd"
+	],
     "type": "library",
     "license": "MIT",
     "autoload": {
