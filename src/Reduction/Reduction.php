@@ -354,8 +354,4 @@ class Reduction {
         return $this;
     }
 
-    /** @phpstan-ignore-next-line */
-    public function getVar(string $name="") {
-        return isset($this->$name) ? $this->$name : null;
-    }
 }

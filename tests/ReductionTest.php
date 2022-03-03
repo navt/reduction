@@ -6,9 +6,9 @@ use PHPUnit\Framework\TestCase;
 use navt\Reduction\Logger\Logger;
 use navt\Reduction\Reduction;
 
-use Reduction\Image;
-use Reduction\Jpeg;
-use Reduction\Png;
+use navt\Reduction\Image;
+use navt\Reduction\Jpeg;
+use navt\Reduction\Png;
 
 class ReductionTest extends TestCase {
     
@@ -23,16 +23,30 @@ class ReductionTest extends TestCase {
 
     public function testConstruct() {
 
-        $this->assertEquals($this->reduct->getVar("cpath"), "test-data/conf-c.json");
-        $this->assertEquals($this->reduct->getVar("mode"), "ImageSide");
-        $this->assertEquals($this->reduct->getVar("maxImageSide"), 480);
-        $this->assertEquals($this->reduct->getVar("ableTypes"), 
+        $this->assertEquals($this->getSomeProperty($this->reduct, "cpath"), "test-data/conf-c.json");
+        $this->assertEquals($this->getSomeProperty($this->reduct, "mode"), "ImageSide");
+        $this->assertEquals($this->getSomeProperty($this->reduct, "maxImageSide"), 480);
+        $this->assertEquals($this->getSomeProperty($this->reduct, "ableTypes"), 
             ["jpeg",
             "png",
             "gif"]);
-        $this->assertEquals($this->reduct->getVar("quality"), 
+        $this->assertEquals($this->getSomeProperty($this->reduct, "quality"), 
             ["jpeg" => 75,
             "png" => 6]);
+
+    }
+
+    public function testJpeg() {
+        
+        $jpeg = new Jpeg();
+        $jpeg->width = 250;
+        $jpeg->height = 500;
+        $jpeg->orientation = 8;
+
+        $this->assertEquals($jpeg->getAngle(), 90);
+        $this->assertEquals($jpeg->getRealWidth(), 500);
+        $this->assertEquals($jpeg->getRealHeight(), 250);
+        $this->assertEquals($jpeg->getRealAspectRatio(), 2.0);
 
     }
 
@@ -44,7 +58,7 @@ class ReductionTest extends TestCase {
         $this->reduct->getList();
         
         // частично смотрим, правильно ли выбралось
-        $list = $this->reduct->getVar("list");
+        $list = $this->getSomeProperty($this->reduct, "list");
         $this->assertEquals(count($list), $q);
         
         $image = $list[rand(0, $q-1)];
@@ -69,9 +83,16 @@ class ReductionTest extends TestCase {
     
     }
 
+    public function getSomeProperty($object, $property) {
+        $refl = new ReflectionClass($object);
+        $prop = $refl->getProperty($property);
+        $prop->setAccessible(true);
+        return $prop->getValue($object);
+     }
+
     public function generate($qPic = 5, $width = 500, $dir = "test-images") {
         
-        if (is_dir($dir) === false) {
+        if (!is_dir($dir)) {
             mkdir($dir);
         }
 
