@@ -85,7 +85,7 @@ class Reduction {
     
     /**
      * паттерны для фильтрации по расширению файла
-     * @var mixed[]  
+     * @var array<string,string>  
      */
     private array $patterns = [
         "jpeg" => "~^(jpg|jpeg)$~i",
@@ -101,6 +101,18 @@ class Reduction {
         IMAGETYPE_GIF => "Gif",
         IMAGETYPE_JPEG => "Jpeg",
         IMAGETYPE_PNG => "Png"
+    ];
+
+    /**
+     * соответствие orientation углу поворота изображения 
+     * @var array<int,int> 
+     */
+
+    public static array $mapping = [
+        1 => 0,
+        3 => 180,
+        6 => -90,
+        8 => 90
     ];
 
     public function __construct(Logger $log, string $cpath="data/config.json") {
@@ -203,22 +215,28 @@ class Reduction {
             $image->size = $file->getSize();    // size
 
             switch ($exiftype) {                // orientation  
-                case IMAGETYPE_JPEG:
-                    $exif = exif_read_data($image->path);
+                case IMAGETYPE_JPEG: // 2
+                    $exif = @exif_read_data($image->path);
                     
                     if (is_array($exif) && !empty($exif["Orientation"])) {
                         $image->orientation = $exif["Orientation"];
+                        // не "фотоаппратная" ориентация изображения
+                        if (array_key_exists($image->orientation, self::$mapping) === false) {
+                            $bad[] = $file->getPathname();
+                            continue 2;
+                        }
+
                     } else {
                         $image->orientation = 1;
                     }
 
                     $image->quality = $this->quality["jpeg"];
                     break;
-                case IMAGETYPE_PNG:
+                case IMAGETYPE_PNG: // 3
                     $image->orientation = 1;
                     $image->quality = $this->quality["png"];
                     break;
-                case IMAGETYPE_GIF:
+                case IMAGETYPE_GIF: // 1
                     $image->orientation = 1;
                     break;
                 default:
@@ -342,7 +360,7 @@ class Reduction {
                 $image->size, 
                 $image->getRealWidth(), 
                 $image->getRealHeight(),
-                $image->orientation);
+                $image->orientation);           
             $this->log->info($m);
             $ts = $ts + $image->size;
         }

@@ -14,16 +14,8 @@ class Jpeg extends Image {
 
     public function getAngle(): int {
 
-        // соответствие orientation углу поворота изображения
-        $mapping = [
-            1 => 0,
-            3 => 180,
-            6 => -90,
-            8 => 90
-        ];
-
-        if (array_key_exists($this->orientation, $mapping)) {
-            return $mapping[$this->orientation];
+        if (array_key_exists($this->orientation, Reduction::$mapping)) {
+            return Reduction::$mapping[$this->orientation];
         } else {
             throw new AppException(
                 __METHOD__." Не определён угол поворота для Orientation {$this->orientation} {$this->path}"
